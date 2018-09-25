@@ -6,13 +6,15 @@ function validate(){
 		document.getElementById("error").innerHTML = "Please provide the userName";
 		document.getElementById("error").style.display = 'block';
 		document.getElementById("username").focus();
+		return false;
 	} else if(password.trim() == ""){
 		document.getElementById("error").innerHTML = "Please provide the password";
 		document.getElementById("error").style.display = 'block';
 		document.getElementById("password").focus();
+		return false;
 	} else {
 		document.getElementById("error").value = "";
 		document.getElementById("error").style.display = 'none';
-		document.getElementById("form_id").submit();
+		return true;
 	}
 }
