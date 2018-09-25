@@ -13,5 +13,6 @@ function validate(){
 	} else {
 		document.getElementById("error").value = "";
 		document.getElementById("error").style.display = 'none';
+		document.getElementById("form_id").submit();
 	}
 }
