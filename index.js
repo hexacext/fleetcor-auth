@@ -16,12 +16,16 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname));
 
 app.get('/login', (request, response) => {
-	console.log(request);
+	//console.log(request);
 	response.sendFile(__dirname + '/login.html');
 });
 
 app.post('/generateToken', (request, response) => {
-	console.log("Inside generateToken ", request);
+	console.log("Inside generateToken ", request.body);
+	console.log("header url ",request.headers);
+	const url = require('url');
+	let urlParts = url.parse(request.headers, true);
+	console.log(urlParts.query);
 });
 
 //To connect the Alexa to express app
