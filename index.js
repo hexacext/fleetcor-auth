@@ -22,9 +22,9 @@ app.get('/login', (request, response) => {
 
 app.post('/generateToken', (request, response) => {
 	console.log("Inside generateToken ", request.body);
-	console.log("header url ",request.headers);
+	console.log("header url ",request.headers.referer);
 	const url = require('url');
-	let urlParts = url.parse(request.headers, true);
+	let urlParts = url.parse(request.headers.referer, true);
 	console.log(urlParts.query);
 });
 
