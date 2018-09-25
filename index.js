@@ -11,6 +11,15 @@ const server = app.listen(process.env.PORT || 5000, () => {
     console.log('Express server listening on port %d in %s mode', server.address().port, app.settings.env);
 });
 
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static(__dirname));
+
+app.get('/login', (request, response) => {
+	console.log(request);
+	response.sendFile(__dirname + '/login.html');
+});
+
 //To connect the Alexa to express app
 alexaApp.express({
     expressApp: app,
