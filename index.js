@@ -20,6 +20,10 @@ app.get('/login', (request, response) => {
 	response.sendFile(__dirname + '/login.html');
 });
 
+app.post('/generateToken', (request, response) => {
+	console.log("Inside generateToken ", request);
+});
+
 //To connect the Alexa to express app
 alexaApp.express({
     expressApp: app,
