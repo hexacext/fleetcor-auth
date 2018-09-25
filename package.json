@@ -1,0 +1,30 @@
+{
+  "name": "fleetcor-auth",
+  "version": "1.0.0",
+  "description": "To implement the Fleetcor Assistant use case using the Fleetcor API and Alexa",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hexacext/fleetcor-auth.git"
+  },
+  "keywords": [
+    "Alexa",
+    "Fleetcor",
+    "API"
+  ],
+  "author": "AnithaThilagar",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hexacext/fleetcor-auth/issues"
+  },
+  "homepage": "https://github.com/hexacext/fleetcor-auth#readme",
+  "dependencies": {
+    "alexa-app": "^4.2.2",
+    "body-parser": "^1.18.3",
+    "express": "^4.16.3"
+  }
+}
