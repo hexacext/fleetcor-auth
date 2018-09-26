@@ -31,7 +31,11 @@ app.post('/generateToken', async (request, response) => {
 	const url = require('url');
 	let urlParts = url.parse(request.headers.referer, true);
 	console.log(urlParts.query);
-	await getAccessToken(request.body);
+	await getAccessToken(request.body).then((token) => {
+		res.redirect(urlParts.query.redirect_uri);
+	}).catch((error) => {
+		
+	});
 });
 
 //To connect the Alexa to express app
@@ -146,9 +150,9 @@ function getAccessToken(credentials){
 	return new Promise((resolve, reject) => {
 		requestModule(options, (error, response, body) => {
 			if (!error && response.statusCode == 200) {
-				console.log("res ",response.headers.authorization);
-				console.log("body",body);
-				return resolve("success");
+				//console.log("res ",response.headers.authorization);
+				//console.log("body",body);
+				return resolve(response.headers.authorization);
 			} else {
 				console.log("error ", error);
 				return reject(error);
