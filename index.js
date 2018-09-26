@@ -146,7 +146,7 @@ function getAccessToken(credentials){
 	return new Promise((resolve, reject) => {
 		requestModule(options, (error, response, body) => {
 			if (!error && response.statusCode == 200) {
-				console.log("res ",response);
+				console.log("res ",response.headers.authorization);
 				console.log("body",body);
 				return resolve("success");
 			} else {
