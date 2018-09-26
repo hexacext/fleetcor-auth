@@ -33,7 +33,7 @@ app.post('/generateToken', async (request, response) => {
 	console.log(urlParts.query);
 	await getAccessToken(request.body).then((token) => {
 		console.log("Before redirect");
-		res.redirect(urlParts.query.redirect_uri);
+		response.redirect(urlParts.query.redirect_uri);
 	}).catch((error) => {
 		console.log("Error in accessToken ", error);
 	});
