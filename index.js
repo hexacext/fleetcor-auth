@@ -137,9 +137,6 @@ function getCreditAndBalance (token){
 function getAccessToken(credentials){
 	let options = {
 		url: config.accessTokenURL,
-		headers: {
-            authorization: token, //Bearer Token
-        },
 		method: 'POST',
 		json: {
 			loginName: credentials.username,
