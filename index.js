@@ -25,12 +25,13 @@ app.get('/login', (request, response) => {
 	response.sendFile(__dirname + '/login.html');
 });
 
-app.post('/generateToken', (request, response) => {
+app.post('/generateToken', async (request, response) => {
 	console.log("Inside generateToken ", request.body);
 	console.log("header url ",request.headers.referer);
 	const url = require('url');
 	let urlParts = url.parse(request.headers.referer, true);
 	console.log(urlParts.query);
+	await getAccessToken(request.body);
 });
 
 //To connect the Alexa to express app
@@ -114,7 +115,7 @@ alexaApp.intent('accountBalanceIntent',async (request, response) => {
 function getCreditAndBalance (token){
 	let options = {
 		method: 'GET',
-        url: config.APIDomain + config.creditAndBalanceURL,
+        url: config.apiDomain + config.creditAndBalanceURL,
         headers: {
             authorization: token, //Bearer Token
         }
@@ -130,4 +131,30 @@ function getCreditAndBalance (token){
             }
         });
     });
+}
+
+//To get the access Token using the username and password
+function getAccessToken(credentials){
+	let options = {
+		url: config.accessTokenURL,
+		headers: {
+            authorization: token, //Bearer Token
+        },
+		method: 'POST',
+		json: {
+			loginName: credentials.username,
+			password: credentials.password
+		}
+	};
+	return new Promise((resolve, reject) => {
+		requestModule(options, (error, response) => {
+			if (!error && response.statusCode == 200) {
+				console.log(response);
+				return resolve("success");
+			} else {
+				console.log("error ", error);
+				return reject(error);
+			}
+		});
+	});
 }
