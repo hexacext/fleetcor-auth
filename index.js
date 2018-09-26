@@ -136,7 +136,7 @@ function getCreditAndBalance (token){
 //To get the access Token using the username and password
 function getAccessToken(credentials){
 	let options = {
-		url: config.accessTokenURL,
+		url: config.apiDomain + config.accessTokenURL,
 		method: 'POST',
 		json: {
 			loginName: credentials.username,
