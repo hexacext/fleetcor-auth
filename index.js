@@ -33,7 +33,7 @@ app.post('/generateToken', async (request, response) => {
 	console.log(urlParts.query);
 	await getAccessToken(request.body).then((token) => {
 		console.log("Before redirect ");
-		response.redirect(urlParts.query.redirect_uri+"#state=12345&token_type=Bearer&access_token="+token.replace('Bearer ',''));
+		response.redirect(urlParts.query.redirect_uri+"#state="+urlParts.query.state+"&token_type=Bearer&access_token="+token.replace('Bearer ',''));
 	}).catch((error) => {
 		console.log("Error in accessToken ", error);
 	});
