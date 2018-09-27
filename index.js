@@ -39,6 +39,10 @@ app.post('/generateToken', async (request, response) => {
 	});
 });
 
+app.post('/accessToken', async (request, response) => {
+	console.log("Inside Access Token ", request);
+});
+
 //To connect the Alexa to express app
 alexaApp.express({
     expressApp: app,
