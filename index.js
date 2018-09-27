@@ -26,14 +26,14 @@ app.get('/login', (request, response) => {
 });
 
 app.post('/generateToken', async (request, response) => {
-	console.log("Inside generateToken ", request.body);
+	console.log("Inside generateToken ", request.body, request.query);
 	console.log("header url ",request.headers.referer);
 	const url = require('url');
 	let urlParts = url.parse(request.headers.referer, true);
 	console.log(urlParts.query);
 	await getAccessToken(request.body).then((token) => {
 		console.log("Before redirect");
-		response.redirect(urlParts.query.redirect_uri);
+		response.redirect(urlParts.query.redirect_uri+"?access-token="+token);
 	}).catch((error) => {
 		console.log("Error in accessToken ", error);
 	});
