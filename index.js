@@ -34,7 +34,7 @@ app.post('/generateToken', async (request, response) => {
 	await getAccessToken(request.body).then((token) => {
 		console.log("Before redirect ", urlParts.query.redirect_uri+"&state=xyz&code=SplxlOBeZQQYbYS6WxSbIA");
 		//response.redirect(urlParts.query.redirect_uri+"?vendorId=M2J3G9PSOAGI37#state=SplxlOBeZQQYbYS6WxSbIA&token_type=Bearer&access_token="+token.replace('Bearer ',''));
-		response.redirect("https://pitangui.amazon.com/api/skill/link/M2J3G9PSOAGI37?state=SplxlOBeZQQYbYS6WxSbIA&token_type=Bearer&access_token="+token.replace('Bearer ',''));
+		response.redirect("https://pitangui.amazon.com/api/skill/link/M2J3G9PSOAGI37?vendorId=M2J3G9PSOAGI37#state=SplxlOBeZQQYbYS6WxSbIA&token_type=Bearer&access_token="+token.replace('Bearer ',''));
 	}).catch((error) => {
 		console.log("Error in accessToken ", error);
 	});
