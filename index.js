@@ -30,11 +30,10 @@ app.post('/generateToken', async (request, response) => {
 	//console.log("header url ",request.headers.referer);
 	const url = require('url');
 	let urlParts = url.parse(request.headers.referer, true);
-	//console.log(urlParts.query);
+	console.log(urlParts.query);
 	await getAccessToken(request.body).then((token) => {
 		console.log("Before redirect ");
-		response.redirect(urlParts.query.redirect_uri+"&state=SplxlOBeZQQYbYS6WxSbIA&token_type=Bearer&access_token="+token.replace('Bearer ',''));
-		//response.redirect("https://pitangui.amazon.com/api/skill/link/M2J3G9PSOAGI37?vendorId=M2J3G9PSOAGI37#state=SplxlOBeZQQYbYS6WxSbIA&token_type=Bearer&access_token="+token.replace('Bearer ',''));
+		response.redirect(urlParts.query.redirect_uri+"#state=12345&token_type=Bearer&access_token="+token.replace('Bearer ',''));
 	}).catch((error) => {
 		console.log("Error in accessToken ", error);
 	});
