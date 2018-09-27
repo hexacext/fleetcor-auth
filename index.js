@@ -25,6 +25,22 @@ app.get('/login', (request, response) => {
 	response.sendFile(__dirname + '/login.html');
 });
 
+//For implicit Grant
+/*app.post('/generateToken', async (request, response) => {
+	console.log("Inside generateToken ", request.body, request.query);
+	//console.log("header url ",request.headers.referer);
+	const url = require('url');
+	let urlParts = url.parse(request.headers.referer, true);
+	console.log(urlParts.query);
+	await getAccessToken(request.body).then((token) => {
+		console.log("Before redirect ");
+		response.redirect(urlParts.query.redirect_uri+"#state="+urlParts.query.state+"&token_type=Bearer&access_token="+token.authorization.replace('Bearer ',''));
+	}).catch((error) => {
+		console.log("Error in accessToken ", error);
+	});
+});*/
+
+//For Auth code Grant
 app.post('/generateToken', async (request, response) => {
 	console.log("Inside generateToken ", request.body, request.query);
 	//console.log("header url ",request.headers.referer);
@@ -33,14 +49,14 @@ app.post('/generateToken', async (request, response) => {
 	console.log(urlParts.query);
 	await getAccessToken(request.body).then((token) => {
 		console.log("Before redirect ");
-		response.redirect(urlParts.query.redirect_uri+"#state="+urlParts.query.state+"&token_type=Bearer&access_token="+token.replace('Bearer ',''));
+		response.redirect(urlParts.query.redirect_uri+"&state=12345&code=SplxlOBeZQQYbYS6WxSbIA");
 	}).catch((error) => {
 		console.log("Error in accessToken ", error);
 	});
 });
 
-app.post('/accessToken', async (request, response) => {
-	console.log("Inside Access Token ", request);
+app.post('/accessToken', (request, response) => {
+	console.log("Inside access token ", request);
 });
 
 //To connect the Alexa to express app
@@ -157,7 +173,7 @@ function getAccessToken(credentials){
 			if (!error && response.statusCode == 200) {
 				//console.log("res ",response.headers.authorization);
 				//console.log("body",body);
-				return resolve(response.headers.authorization);
+				return resolve(response.headers);
 			} else {
 				console.log("error ", error);
 				return reject(error);
