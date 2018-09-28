@@ -130,6 +130,7 @@ alexaApp.intent('creditLimitIntent', async (request, response) => {
 		response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
 		response.say(say.join('\n'));
 	}).catch((error) => {
+		console.log("Error in getting Credit Limit ", error);
 		say = [`Sorry, <break strength=\"medium\" /> I am not able to answer this at the moment.<break strength=\"medium\" /> Please try again later`];
 		response.shouldEndSession(true);
 		response.say(say.join('\n'));
@@ -147,6 +148,7 @@ alexaApp.intent('accountBalanceIntent',async (request, response) => {
 		response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
 		response.say(say.join('\n'));
 	}).catch((error) => {
+		console.log("Error in getting balance ", error);
 		say = [`Sorry, <break strength=\"medium\" /> I am not able to answer this at the moment.<break strength=\"medium\" /> Please try again later`];
 		response.shouldEndSession(true);
 		response.say(say.join('\n'));
