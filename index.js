@@ -213,7 +213,7 @@ alexaApp.intent('yesIntent',async function (request, response) {
 	if(isblockCard){
 		//After completing the operation reset the flag
 		isblockCard = false;
-		await api.blockCardURL(request.getSession().details.accessToken, cardId, cardDetailsJson).then((status) => {
+		await api.blockCard(request.getSession().details.accessToken, cardId, cardDetailsJson).then((status) => {
 			cardId = ""; //Once the card is blocked reset the value
 			say = ["Your card has been blocked successfully <break strength=\"medium\" /> Is there anything I can help you with?"];
 			response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
