@@ -246,7 +246,7 @@ alexaApp.intent('yesIntent',async function (request, response) {
 async function handleQuery(token, say, response){
 	if(isblockCard){
 		await getCardDetails(token).then((cardArray) => {
-			console.log(cardArray);
+			console.log(cardArray.length);
 			say = [`Sorry, <break strength=\"medium\" /> I am not able to answer this at the moment.<break strength=\"medium\" /> Please try again later`];
 			response.shouldEndSession(true);
 			response.say(say.join('\n'));
