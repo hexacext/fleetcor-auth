@@ -1,7 +1,7 @@
 {
   "users": {
     "user1": {
-      "refreshToken": ""
+      "cardId": ""
     }
   }
 }

@@ -19,13 +19,17 @@ app.use(express.static(__dirname));
 
 var isCreditLimit = false;
 var isAccountBalance = false;
+var isblockCard = false;
+var isRecentTransactions = false;
+var isExistingCard = false;
+var cardId = "";
 
+//For Authentication
 app.get('/login', (request, response) => {
-	//console.log(request);
 	response.sendFile(__dirname + '/login.html');
 });
 
-//For implicit Grant
+//For implicit Grant Type
 /*app.post('/generateToken', async (request, response) => {
 	console.log("Inside generateToken ", request.body, request.query);
 	//console.log("header url ",request.headers.referer);
@@ -40,10 +44,10 @@ app.get('/login', (request, response) => {
 	});
 });*/
 
-//For Auth code Grant
+//For Auth code Grant Type
+//To generate the code after authorization
 app.post('/generateToken', async (request, response) => {
-	console.log("Inside generateToken ", request.body, request.query);
-	//console.log("header url ",request.headers.referer);
+	console.log("Inside generateToken ");
 	const url = require('url');
 	let urlParts = url.parse(request.headers.referer, true);
 	console.log(urlParts.query);
@@ -54,8 +58,8 @@ app.post('/generateToken', async (request, response) => {
 	});
 });
 
+//To generate the access token using the code generated
 app.post('/accessToken', async (request, response) => {
-	//console.log("Inside access token ", request);
 	request.body = {
 		username: 'AK037',
 		password: 'Password@1'
@@ -65,7 +69,7 @@ app.post('/accessToken', async (request, response) => {
 		let details = {
 		  "access_token" : token.authorization.replace('Bearer ',''),
 		  "token_type" : "bearer",
-		  "expires_in" : 3600,
+		  "expires_in" : 360,
 		  "refresh_token" : token["refresh-token"],
 		  "scope" : "profile"
 		};
@@ -106,7 +110,7 @@ alexaApp.launch(function (request, response) {
 		response.shouldEndSession(false);
 	} else {
 		response.card(alexaApp.accountLinkingCard());
-		response.say('<s>FleetCor Assistant requires you to link your Amazon account</s>');
+		response.say('<s>FleetCor Assistant requires you to link your FleetCor account</s>');
 		response.shouldEndSession(true);
 	}
 });
@@ -125,7 +129,6 @@ alexaApp.intent('creditLimitIntent', async (request, response) => {
 	isCreditLimit = true;
     let say = [];
 	await getCreditAndBalance(request.getSession().details.accessToken).then((accountDetails) => {
-		//console.log(accountDetails.creditLimit);
 		say = [`The credit Limit for your account is <break strength="medium" /> $ ${accountDetails.creditLimit} <break strength="medium" />Is there anything I can help you with?`];
 		response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
 		response.say(say.join('\n'));
@@ -143,7 +146,6 @@ alexaApp.intent('accountBalanceIntent',async (request, response) => {
 	isAccountBalance = true;
 	let say = [];
 	await getCreditAndBalance(request.getSession().details.accessToken).then((accountDetails) => {
-		//console.log(accountDetails.balance);
 		say = [`The balance in your account is <break strength="medium" /> $ ${accountDetails.balance} <break strength="medium" />Is there anything I can help you with?`];
 		response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
 		response.say(say.join('\n'));
@@ -155,9 +157,106 @@ alexaApp.intent('accountBalanceIntent',async (request, response) => {
 	});
 });
 
+//To handle the block card queries
+alexaApp.intent('blockCardIntent', async function (request, response) {
+	console.log("Inside block Intent");
+    isblockCard = true;
+    let say = [];
+	//Check if the card id is given in utterance/ user input
+	if(request.data.request.intent.slots.lastFour.value){
+		cardId = request.data.request.intent.slots.lastFour.value;
+		await handleQuery(request.getSession().details.accessToken, say, response);
+	} else {
+		//Check if card id is already stored in session
+		if(cardId.trim() != ""){
+			isExistingCard = true;
+			say = [`Sure,<break strength=\"medium\" /> Do you want to block the card with ID <say-as interpret-as='digits'> ${cardId} </say-as>`];
+			response.shouldEndSession(false, `Tell me Yes <break strength=\"medium\" /> to block the card <say-as interpret-as='digits'> ${cardId} </say-as>
+			<break strength=\"medium\" />or No <break strength=\"medium\" /> to check for other card`);
+			response.say(say.join('\n'));
+		} else {
+			//Get card id from user
+			isExistingCard = false;
+			say = ["Sure,<break strength=\"medium\" /> Please provide the ID for the card you wish to block"];
+			response.shouldEndSession(false, "Tell me the ID for the card to be blocked");
+			response.say(say.join('\n'));
+		}
+	}
+});
+
+ //To get the card id
+alexaApp.intent('cardNumberIntent', async function (request, response) {
+	console.log("Inside CN Intent");
+    var say = [];
+    console.log(request.data.request.intent.slots.cardNumber.value)
+    cardId = request.data.request.intent.slots.cardNumber.value;
+	await handleQuery(request.getSession().details.accessToken, say, response);
+});
+
+async function handleQuery(token, say, response){
+	if(isblockCard){
+		await getCardDetails(token).then((cardArray) => {
+			console.log(cardArray);
+			say = [`Sorry, <break strength=\"medium\" /> I am not able to answer this at the moment.<break strength=\"medium\" /> Please try again later`];
+			response.shouldEndSession(true);
+			response.say(say.join('\n'));
+		}).catch((error) => {
+			console.log("Error in getting card details ", error);
+			say = [`Sorry, <break strength=\"medium\" /> I am not able to answer this at the moment.<break strength=\"medium\" /> Please try again later`];
+			response.shouldEndSession(true);
+			response.say(say.join('\n'));
+		});
+	}
+}
+
+//To get the card details available for the user
+function getCardDetails(token){
+	let options = {
+		method: 'GET',
+        url: config.apiDomain + config.cardDetailsURL,
+        headers: {
+            authorization: 'Bearer ' + token, //Bearer Token
+        }
+	};
+	return new Promise((resolve, reject) => {
+        requestModule(options, (error, response, body) => {
+            if (!error && response.statusCode === 200) {
+                var data = JSON.parse(body);
+                console.log(data);
+                return resolve(data);
+            } else {
+                return reject(error);
+            }
+        });
+    });
+}
+
+//To block the user card using the card id
+function blockCard(token, cardJson){
+	let options = {
+		url: config.apiDomain + config.blockCardURL.replace('CARD_ID',cardId),
+		method: 'PUT',
+		json: cardJson,
+		headers: {
+            authorization: 'Bearer ' + token, //Bearer Token
+        }
+	};
+	return new Promise((resolve, reject) => {
+		requestModule(options, (error, response, body) => {
+			if (!error && response.statusCode == 200) {
+				var data = JSON.parse(body);
+                console.log(data);
+				return resolve(data);
+			} else {
+				console.log("error ", error);
+				return reject(error);
+			}
+		});
+	});
+}
+
 //To get the credit limit and balance from the API
 function getCreditAndBalance (token){
-	console.log("Inside CB ", token);
 	let options = {
 		method: 'GET',
         url: config.apiDomain + config.creditAndBalanceURL,
