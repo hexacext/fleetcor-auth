@@ -320,6 +320,7 @@ alexaApp.intent('AMAZON.FallbackIntent', function (request, response) {
 //To handle the queries in common
 async function handleQuery(token, say, response){
 	if(isblockCard){
+		console.log("Inside block card handle");
 		await api.getCardDetails(token).then((cardDetails) => {
 			if(cardDetails){
 				cardDetailsJson = cardDetails;
