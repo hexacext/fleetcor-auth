@@ -16,13 +16,12 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname));
 
-var isCreditLimit = false;
-var isAccountBalance = false;
 var isblockCard = false;
 var isRecentTransactions = false;
 var isExistingCard = false;
 var cardId = "";
 var cardDetailsJson = {};
+var accessTokenJson = {}; //Maintain in a separate session object
 
 //For Authentication
 app.get('/login', (request, response) => {
@@ -52,6 +51,7 @@ app.post('/generateToken', async (request, response) => {
 	let urlParts = url.parse(request.headers.referer, true);
 	console.log(urlParts.query);
 	await api.getAccessToken(request.body).then((token) => {
+		accessToken = token;
 		response.redirect(urlParts.query.redirect_uri+"?response_type=code&state="+urlParts.query.state+"&code=SplxlOBeZQQYbYS6WxSbIA");
 	}).catch((error) => {
 		console.log("Error in accessToken ", error);
@@ -139,8 +139,7 @@ alexaApp.intent('unblockCardIntent', function (request, response) {
 //To handle the credit limit queries
 alexaApp.intent('creditLimitIntent', async (request, response) => {
 	console.log("Inside CL Intent");
-	isCreditLimit = true;
-    let say = [];
+	let say = [];
 	await api.getCreditAndBalance(request.getSession().details.accessToken).then((accountDetails) => {
 		say = [`The credit Limit for your account is <break strength="medium" /> $ ${accountDetails.creditLimit} <break strength="medium" />Is there anything I can help you with?`];
 		response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
@@ -156,7 +155,6 @@ alexaApp.intent('creditLimitIntent', async (request, response) => {
 //To handle the account balance queries
 alexaApp.intent('accountBalanceIntent',async (request, response) => {
 	console.log("Inside AB Intent ");
-	isAccountBalance = true;
 	let say = [];
 	await api.getCreditAndBalance(request.getSession().details.accessToken).then((accountDetails) => {
 		say = [`The balance in your account is <break strength="medium" /> $ ${accountDetails.balance} <break strength="medium" />Is there anything I can help you with?`];
@@ -266,9 +264,32 @@ alexaApp.intent('yesIntent',async function (request, response) {
     response.say(say.join('\n'));
  });
  
+ //To handle the recent transaction queries
+alexaApp.intent('transactionsIntent', async function(request, response){
+	console.log("Inside Trans Intent ");
+	isRecentTransactions = true;
+	let say = [];
+	if(request.data.request.intent.slots.transactionNumber.value){
+		lastFour = request.data.request.intent.slots.transactionNumber.value;
+		await handleQuery(say, response);
+	} else {
+		if(lastFour.trim() != ""){
+			isExistingCard = true;
+			say = [`Sure,<break strength=\"medium\" /> Do you want to check the transactions for card ending with <say-as interpret-as='digits'> ${lastFour} </say-as>`];
+			response.shouldEndSession(false, `Tell me Yes <break strength=\"medium\" /> to check the transactions <say-as interpret-as='digits'> ${lastFour} </say-as>
+			<break strength=\"medium\" />or No <break strength=\"medium\" /> to check for other card`);
+			response.say(say.join('\n'));
+		} else {
+			isExistingCard = false;
+			say = ["Sure,<break strength=\"medium\" /> Please provide the last 4 digits of the card you wish to know"];
+			response.shouldEndSession(false, "Tell me the last 4 digits of your card to check the transactions");
+			response.say(say.join('\n'));
+			
+		}
+	}
+});
+ 
  alexaApp.intent('AMAZON.StopIntent', function (request, response) {
-	isCreditLimit = false;
-	isAccountBalance = false;
 	isblockCard = false;
 	isRecentTransactions = false;
 	isExistingCard = false;
@@ -286,8 +307,6 @@ alexaApp.intent('AMAZON.HelpIntent', function (request, response) {
 });
 
 alexaApp.intent('AMAZON.CancelIntent', function (request, response) {
-	isCreditLimit = false;
-	isAccountBalance = false;
 	isblockCard = false;
 	isRecentTransactions = false;
 	isExistingCard = false;
@@ -299,8 +318,6 @@ alexaApp.intent('AMAZON.CancelIntent', function (request, response) {
 
 //To handle if user wants to end the conversation
 alexaApp.intent('thankIntent', function (request, response) {
-	isCreditLimit = false;
-	isAccountBalance = false;
 	isblockCard = false;
 	isRecentTransactions = false;
 	isExistingCard = false;
