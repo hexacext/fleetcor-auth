@@ -48,7 +48,7 @@ app.post('/generateToken', async (request, response) => {
 	let urlParts = url.parse(request.headers.referer, true);
 	console.log(urlParts.query);
 	await getAccessToken(request.body).then((token) => {
-		console.log("Before redirect ");
+		console.log("Before redirect ",urlParts.query.redirect_uri+"&response_type=code&state="+urlParts.query.state+"&code=SplxlOBeZQQYbYS6WxSbIA");
 		response.redirect(urlParts.query.redirect_uri+"&response_type=code&state="+urlParts.query.state+"&code=SplxlOBeZQQYbYS6WxSbIA");
 	}).catch((error) => {
 		console.log("Error in accessToken ", error);
