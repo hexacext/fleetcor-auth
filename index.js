@@ -321,7 +321,7 @@ alexaApp.intent('AMAZON.FallbackIntent', function (request, response) {
 async function handleQuery(token, say, response){
 	if(isblockCard){
 		console.log("Inside block card handle");
-		await api.getCardDetails(token).then((cardDetails) => {
+		await api.getCardDetails(token, cardId).then((cardDetails) => {
 			if(cardDetails){
 				cardDetailsJson = cardDetails;
 				say = [`The card once blocked cannot be unblocked <break strength=\"medium\" /> it can only be re-issued <break strength=\"x-strong\" /> 
