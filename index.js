@@ -66,7 +66,7 @@ app.post('/accessToken', async (request, response) => {
 		  "access_token" : token.authorization.replace('Bearer ',''),
 		  "token_type" : "bearer",
 		  "expires_in" : 3600,
-		  "refresh_token" : token.refresh-token,
+		  "refresh_token" : token[refresh-token],
 		  "scope" : "profile"
 		};
 		console.log("Completed ", details);
@@ -124,7 +124,7 @@ alexaApp.intent('creditLimitIntent', async (request, response) => {
 	console.log("Inside CL Intent");
 	isCreditLimit = true;
     let say = [];
-	await getCreditAndBalance(token).then((accountDetails) => {
+	await getCreditAndBalance(request.getSession().details.accessToken).then((accountDetails) => {
 		//console.log(accountDetails.creditLimit);
 		say = [`The credit Limit for your account is <break strength="medium" /> $ ${accountDetails.creditLimit} <break strength="medium" />Is there anything I can help you with?`];
 		response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
@@ -141,7 +141,7 @@ alexaApp.intent('accountBalanceIntent',async (request, response) => {
 	console.log("Inside AB Intent ", lastFour);
 	isAccountBalance = true;
 	let say = [];
-	await getCreditAndBalance(token).then((accountDetails) => {
+	await getCreditAndBalance(request.getSession().details.accessToken).then((accountDetails) => {
 		//console.log(accountDetails.balance);
 		say = [`The balance in your account is <break strength="medium" /> $ ${accountDetails.balance} <break strength="medium" />Is there anything I can help you with?`];
 		response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
@@ -159,7 +159,7 @@ function getCreditAndBalance (token){
 		method: 'GET',
         url: config.apiDomain + config.creditAndBalanceURL,
         headers: {
-            authorization: token, //Bearer Token
+            authorization: 'Bearer ' + token, //Bearer Token
         }
 	};
 	return new Promise((resolve, reject) => {
