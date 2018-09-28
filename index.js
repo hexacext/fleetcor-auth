@@ -102,12 +102,25 @@ alexaApp.accountLinkingCard = function () {
 }
 
 //Welcome or start Intent
-alexaApp.launch(function (request, response) {
+alexaApp.launch(async (request, response) => {
     console.log('Session Obj ' + JSON.stringify(request.getSession()));
     let say = [];
 	if (request.getSession().details.accessToken) {
-		response.say('<s>Hi I am Fleetcor Assistant</s>');
-		response.shouldEndSession(false);
+		await getUserDetails(request.getSession().details.accessToken).then((userDetails) => {
+			say.push(`Hi ${userDetails.firstName} ${userDetails.lastName} <break strength="medium" />
+			I am Fleetcor Assistant.<break strength="medium" />I can help you with managing your Fleetcards.
+			<break strength="medium" />You may ask ‘What is my credit limit?’ or <break strength="medium" /> ‘What is my available balance?’.
+			<break strength="medium" />You can stop the conversation anytime by saying end <break strength="medium" /> or stop
+			<break strength="medium" />What can I do for you today`); 
+			response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");			
+			response.say(say.join('\n'));
+			response.send();
+		}).catch((error) => {
+			console.log("Error in acc link ", error);
+			response.say('<s>There was a problem with account linking.<break strength="medium" /> Please try again later</s>');
+			response.shouldEndSession(true);
+			response.send();
+		});
 	} else {
 		response.card(alexaApp.accountLinkingCard());
 		response.say('<s>FleetCor Assistant requires you to link your FleetCor account</s>');
@@ -119,7 +132,7 @@ alexaApp.launch(function (request, response) {
 alexaApp.intent('unblockCardIntent', function (request, response) {
 	console.log("Inside unblock Intent");
     let say = [`Sorry <break strength=\"medium\" /> The card once blocked cannot be unblocked.<break strength=\"medium\" /> You will have to place request to reissue a new card.<break strength=\"medium\" /> Is there anything I can help you with`];
-    response.shouldEndSession(false, "");
+    response.shouldEndSession(false);
     response.say(say.join('\n'));
 });
 
@@ -349,4 +362,25 @@ function getAccessToken(credentials){
 			}
 		});
 	});
+}
+
+//To get the user details using the accessToken
+function getUserDetails(token){
+	let options = {
+		method: 'GET',
+        url: config.apiDomain + config.userProfileURL,
+        headers: {
+            authorization: 'Bearer ' + token, //Bearer Token
+        }
+	};
+	return new Promise((resolve, reject) => {
+        requestModule(options, (error, response, body) => {
+            if (!error && response.statusCode === 200) {
+                var data = JSON.parse(body);
+                return resolve(data);
+            } else {
+                return reject(error);
+            }
+        });
+    });
 }
