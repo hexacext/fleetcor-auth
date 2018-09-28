@@ -55,7 +55,7 @@ app.post('/generateToken', async (request, response) => {
 });
 
 app.post('/accessToken', async (request, response) => {
-	console.log("Inside access token ", request);
+	//console.log("Inside access token ", request);
 	request.body = {
 		username: 'AK037',
 		password: 'Password@1'
