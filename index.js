@@ -255,7 +255,59 @@ alexaApp.intent('yesIntent',async function (request, response) {
 	}
     response.say(say.join('\n'));
  });
+ 
+ alexaApp.intent('AMAZON.StopIntent', function (request, response) {
+	isCreditLimit = false;
+	isAccountBalance = false;
+	isblockCard = false;
+	isRecentTransactions = false;
+	isExistingCard = false;
+	console.log("Inside stop Intent");
+    let say = ["Happy to help you! Good bye"];
+    response.shouldEndSession(true);
+    response.say(say.join('\n'));
+});
 
+alexaApp.intent('AMAZON.HelpIntent', function (request, response) {
+	console.log("Inside help Intent");
+    let say = ["I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card"];
+    response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
+    response.say(say.join('\n'));
+});
+
+alexaApp.intent('AMAZON.CancelIntent', function (request, response) {
+	isCreditLimit = false;
+	isAccountBalance = false;
+	isblockCard = false;
+	isRecentTransactions = false;
+	isExistingCard = false;
+	console.log("Inside cancel Intent");
+    let say = ["Happy to help you! Good bye"];
+    response.shouldEndSession(true);
+    response.say(say.join('\n'));
+});
+
+//To handle if user wants to end the conversation
+alexaApp.intent('thankIntent', function (request, response) {
+	isCreditLimit = false;
+	isAccountBalance = false;
+	isblockCard = false;
+	isRecentTransactions = false;
+	isExistingCard = false;
+	console.log("Inside thank Intent");
+    var say =["<s> Happy to help you!</s><break strength=\"medium\" /> Good bye"];
+    response.shouldEndSession(true);
+    response.say(say.join('\n'));
+});
+
+alexaApp.intent('AMAZON.FallbackIntent', function (request, response) {
+	console.log("Inside fallback Intent");
+    var say =["Sorry,<break strength=\"medium\" />I cannot help you at the moment.<break strength=\"medium\" />Try again later"];
+    response.shouldEndSession(true);
+    response.say(say.join('\n'));
+});
+
+//To handle the queries in common
 async function handleQuery(token, say, response){
 	if(isblockCard){
 		await getCardDetails(token).then((cardArray) => {
