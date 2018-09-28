@@ -48,7 +48,6 @@ app.post('/generateToken', async (request, response) => {
 	let urlParts = url.parse(request.headers.referer, true);
 	console.log(urlParts.query);
 	await getAccessToken(request.body).then((token) => {
-		console.log("Before redirect ",urlParts.query.redirect_uri+"?response_type=code&state="+urlParts.query.state+"&code=SplxlOBeZQQYbYS6WxSbIA");
 		response.redirect(urlParts.query.redirect_uri+"?response_type=code&state="+urlParts.query.state+"&code=SplxlOBeZQQYbYS6WxSbIA");
 	}).catch((error) => {
 		console.log("Error in accessToken ", error);
@@ -57,6 +56,23 @@ app.post('/generateToken', async (request, response) => {
 
 app.post('/accessToken', (request, response) => {
 	console.log("Inside access token ", request);
+	request.body = {
+		username: 'AK037',
+		password: 'Password@1'
+	};
+	await getAccessToken(request.body).then((token) => {
+		console.log("Completed");
+		response.send({
+		  "access_token" : token.authorization.replace('Bearer ',''),
+		  "token_type" : "bearer",
+		  "expires_in" : 300,
+		  "refresh_token" : token.refresh-token,
+		  "scope" : "profile",
+		  "owner_id" : "12345"
+		});
+	}).catch((error) => {
+		console.log("Error in accessToken ", error);
+	});
 });
 
 //To connect the Alexa to express app
