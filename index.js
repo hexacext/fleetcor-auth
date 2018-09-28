@@ -22,6 +22,7 @@ var isblockCard = false;
 var isRecentTransactions = false;
 var isExistingCard = false;
 var cardId = "";
+var cardDetailsJson = {};
 
 //For Authentication
 app.get('/login', (request, response) => {
@@ -212,6 +213,16 @@ alexaApp.intent('yesIntent',async function (request, response) {
 	if(isblockCard){
 		//After completing the operation reset the flag
 		isblockCard = false;
+		await api.blockCardURL(request.getSession().details.accessToken, cardId, cardDetailsJson).then((status) => {
+			cardId = ""; //Once the card is blocked reset the value
+			say = ["Your card has been blocked successfully <break strength=\"medium\" /> Is there anything I can help you with?"];
+			response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
+			response.say(say.join('\n'));
+		}).catch((error) => {
+			say = [`I am not able to complete your request at the moment.<break strength=\"medium\" /> Please try again later`];
+			response.shouldEndSession(true);
+			response.say(say.join('\n'));
+		});
 	} else if(isRecentTransactions){
 		//After completing the operation reset the flag
 		isRecentTransactions = false;
@@ -309,11 +320,23 @@ alexaApp.intent('AMAZON.FallbackIntent', function (request, response) {
 //To handle the queries in common
 async function handleQuery(token, say, response){
 	if(isblockCard){
-		await api.getCardDetails(token).then((cardArray) => {
-			console.log(cardArray.length);
-			say = [`Sorry, <break strength=\"medium\" /> I am not able to answer this at the moment.<break strength=\"medium\" /> Please try again later`];
-			response.shouldEndSession(true);
-			response.say(say.join('\n'));
+		await api.getCardDetails(token).then((cardDetails) => {
+			if(cardDetails){
+				cardDetailsJson = cardDetails;
+				say = [`The card once blocked cannot be unblocked <break strength=\"medium\" /> it can only be re-issued <break strength=\"x-strong\" /> 
+				Are you sure <break strength=\"medium\" /> you want to block the card with ID <say-as interpret-as='digits'> ${cardId} </say-as>`];
+				response.shouldEndSession(false, "Say Yes to block <break strength=\"medium\" /> or No to not block the card");
+				response.say(say.join('\n'));
+			} else {
+				//After completing the operation reset the flag
+				isblockCard = false;
+				say = [`Please check <break strength=\"medium\" /> There is no card with ID <say-as interpret-as='digits'> ${cardId} </say-as>
+				<break strength=\"medium\" />Is there anything I can help you with?`];
+				cardId = "";
+				console.log("cardId ", cardId);
+				response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
+				response.say(say.join('\n'));
+			}
 		}).catch((error) => {
 			console.log("Error in getting card details ", error);
 			say = [`Sorry, <break strength=\"medium\" /> I am not able to answer this at the moment.<break strength=\"medium\" /> Please try again later`];

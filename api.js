@@ -67,10 +67,10 @@ var api = {
 		});
 	},
 	//To get the card details available for the user
-	getCardDetails: (token) => {
+	getCardDetails: (token, cardId) => {
 		let options = {
 			method: 'GET',
-			url: config.apiDomain + config.cardDetailsURL,
+			url: config.apiDomain + config.cardDetailsURL.replace('CARD_ID',cardId),
 			headers: {
 				authorization: 'Bearer ' + token, //Bearer Token
 			}
@@ -87,7 +87,7 @@ var api = {
 		});
 	},
 	//To block the user card using the card id
-	blockCard: (token, cardJson) => {
+	blockCard: (token, cardId, cardJson) => {
 		let options = {
 			url: config.apiDomain + config.blockCardURL.replace('CARD_ID',cardId),
 			method: 'PUT',

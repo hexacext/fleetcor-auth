@@ -3,7 +3,7 @@ config ={
 	"accessTokenURL"	  : "api/sessions",
 	"creditAndBalanceURL" : "api/businesses/me",
 	"userProfileURL"	  : "api/users/me",
-	"cardDetailsURL"	  : "api/cards",
+	"cardDetailsURL"	  : "api/cards/CARD_ID",
 	"blockCardURL"		  : "api/cards/CARD_ID"
 }
 module.exports = config;
