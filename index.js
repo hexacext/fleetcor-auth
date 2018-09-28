@@ -5,8 +5,7 @@ const express = require('express'),
     alexa = require('alexa-app'),
     app = express(),
     alexaApp = new alexa.app("fleetcorauth"),
-	requestModule = require('request'),
-	config = require('./config');
+	api = require('./api');
 
 //create server to listen to port from the environment variable or 5000
 const server = app.listen(process.env.PORT || 5000, () => {
@@ -36,7 +35,7 @@ app.get('/login', (request, response) => {
 	const url = require('url');
 	let urlParts = url.parse(request.headers.referer, true);
 	console.log(urlParts.query);
-	await getAccessToken(request.body).then((token) => {
+	await api.getAccessToken(request.body).then((token) => {
 		console.log("Before redirect ");
 		response.redirect(urlParts.query.redirect_uri+"#state="+urlParts.query.state+"&token_type=Bearer&access_token="+token.authorization.replace('Bearer ',''));
 	}).catch((error) => {
@@ -51,7 +50,7 @@ app.post('/generateToken', async (request, response) => {
 	const url = require('url');
 	let urlParts = url.parse(request.headers.referer, true);
 	console.log(urlParts.query);
-	await getAccessToken(request.body).then((token) => {
+	await api.getAccessToken(request.body).then((token) => {
 		response.redirect(urlParts.query.redirect_uri+"?response_type=code&state="+urlParts.query.state+"&code=SplxlOBeZQQYbYS6WxSbIA");
 	}).catch((error) => {
 		console.log("Error in accessToken ", error);
@@ -64,7 +63,7 @@ app.post('/accessToken', async (request, response) => {
 		username: 'AK037',
 		password: 'Password@1'
 	};
-	await getAccessToken(request.body).then((token) => {
+	await api.getAccessToken(request.body).then((token) => {
 		console.log("Token ", token);
 		let details = {
 		  "access_token" : token.authorization.replace('Bearer ',''),
@@ -106,7 +105,7 @@ alexaApp.launch(async (request, response) => {
     console.log('Session Obj ' + JSON.stringify(request.getSession()));
     let say = [];
 	if (request.getSession().details.accessToken) {
-		await getUserDetails(request.getSession().details.accessToken).then((userDetails) => {
+		await api.getUserDetails(request.getSession().details.accessToken).then((userDetails) => {
 			say.push(`Hi ${userDetails.firstName} ${userDetails.lastName} <break strength="medium" />
 			I am Fleetcor Assistant.<break strength="medium" />I can help you with managing your Fleetcards.
 			<break strength="medium" />You may ask ‘What is my credit limit?’ or <break strength="medium" /> ‘What is my available balance?’.
@@ -141,7 +140,7 @@ alexaApp.intent('creditLimitIntent', async (request, response) => {
 	console.log("Inside CL Intent");
 	isCreditLimit = true;
     let say = [];
-	await getCreditAndBalance(request.getSession().details.accessToken).then((accountDetails) => {
+	await api.getCreditAndBalance(request.getSession().details.accessToken).then((accountDetails) => {
 		say = [`The credit Limit for your account is <break strength="medium" /> $ ${accountDetails.creditLimit} <break strength="medium" />Is there anything I can help you with?`];
 		response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
 		response.say(say.join('\n'));
@@ -158,7 +157,7 @@ alexaApp.intent('accountBalanceIntent',async (request, response) => {
 	console.log("Inside AB Intent ");
 	isAccountBalance = true;
 	let say = [];
-	await getCreditAndBalance(request.getSession().details.accessToken).then((accountDetails) => {
+	await api.getCreditAndBalance(request.getSession().details.accessToken).then((accountDetails) => {
 		say = [`The balance in your account is <break strength="medium" /> $ ${accountDetails.balance} <break strength="medium" />Is there anything I can help you with?`];
 		response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
 		response.say(say.join('\n'));
@@ -310,7 +309,7 @@ alexaApp.intent('AMAZON.FallbackIntent', function (request, response) {
 //To handle the queries in common
 async function handleQuery(token, say, response){
 	if(isblockCard){
-		await getCardDetails(token).then((cardArray) => {
+		await api.getCardDetails(token).then((cardArray) => {
 			console.log(cardArray.length);
 			say = [`Sorry, <break strength=\"medium\" /> I am not able to answer this at the moment.<break strength=\"medium\" /> Please try again later`];
 			response.shouldEndSession(true);
@@ -322,117 +321,4 @@ async function handleQuery(token, say, response){
 			response.say(say.join('\n'));
 		});
 	}
-}
-
-//To get the card details available for the user
-function getCardDetails(token){
-	let options = {
-		method: 'GET',
-        url: config.apiDomain + config.cardDetailsURL,
-        headers: {
-            authorization: 'Bearer ' + token, //Bearer Token
-        }
-	};
-	return new Promise((resolve, reject) => {
-        requestModule(options, (error, response, body) => {
-            if (!error && response.statusCode === 200) {
-                var data = JSON.parse(body);
-                //console.log(data);
-                return resolve(data);
-            } else {
-                return reject(error);
-            }
-        });
-    });
-}
-
-//To block the user card using the card id
-function blockCard(token, cardJson){
-	let options = {
-		url: config.apiDomain + config.blockCardURL.replace('CARD_ID',cardId),
-		method: 'PUT',
-		json: cardJson,
-		headers: {
-            authorization: 'Bearer ' + token, //Bearer Token
-        }
-	};
-	return new Promise((resolve, reject) => {
-		requestModule(options, (error, response, body) => {
-			if (!error && response.statusCode == 200) {
-				var data = JSON.parse(body);
-                console.log(data);
-				return resolve(data);
-			} else {
-				console.log("error ", error);
-				return reject(error);
-			}
-		});
-	});
-}
-
-//To get the credit limit and balance from the API
-function getCreditAndBalance (token){
-	let options = {
-		method: 'GET',
-        url: config.apiDomain + config.creditAndBalanceURL,
-        headers: {
-            authorization: 'Bearer ' + token, //Bearer Token
-        }
-	};
-	return new Promise((resolve, reject) => {
-        requestModule(options, (error, response, body) => {
-            if (!error && response.statusCode === 200) {
-                var data = JSON.parse(body);
-                console.log(data.balance,data.creditLimit);
-                return resolve(data);
-            } else {
-                return reject(error);
-            }
-        });
-    });
-}
-
-//To get the access Token using the username and password
-function getAccessToken(credentials){
-	let options = {
-		url: config.apiDomain + config.accessTokenURL,
-		method: 'POST',
-		json: {
-			loginName: credentials.username,
-			password: credentials.password
-		}
-	};
-	return new Promise((resolve, reject) => {
-		requestModule(options, (error, response, body) => {
-			if (!error && response.statusCode == 200) {
-				//console.log("res ",response.headers.authorization);
-				//console.log("body",body);
-				return resolve(response.headers);
-			} else {
-				console.log("error ", error);
-				return reject(error);
-			}
-		});
-	});
-}
-
-//To get the user details using the accessToken
-function getUserDetails(token){
-	let options = {
-		method: 'GET',
-        url: config.apiDomain + config.userProfileURL,
-        headers: {
-            authorization: 'Bearer ' + token, //Bearer Token
-        }
-	};
-	return new Promise((resolve, reject) => {
-        requestModule(options, (error, response, body) => {
-            if (!error && response.statusCode === 200) {
-                var data = JSON.parse(body);
-                return resolve(data);
-            } else {
-                return reject(error);
-            }
-        });
-    });
 }
