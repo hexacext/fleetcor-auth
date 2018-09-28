@@ -285,7 +285,7 @@ function getCardDetails(token){
         requestModule(options, (error, response, body) => {
             if (!error && response.statusCode === 200) {
                 var data = JSON.parse(body);
-                console.log(data);
+                //console.log(data);
                 return resolve(data);
             } else {
                 return reject(error);
