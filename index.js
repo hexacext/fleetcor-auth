@@ -139,7 +139,7 @@ alexaApp.intent('creditLimitIntent', async (request, response) => {
 
 //To handle the account balance queries
 alexaApp.intent('accountBalanceIntent',async (request, response) => {
-	console.log("Inside AB Intent ", lastFour);
+	console.log("Inside AB Intent ");
 	isAccountBalance = true;
 	let say = [];
 	await getCreditAndBalance(request.getSession().details.accessToken).then((accountDetails) => {
