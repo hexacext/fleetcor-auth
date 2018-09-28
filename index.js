@@ -155,6 +155,7 @@ alexaApp.intent('accountBalanceIntent',async (request, response) => {
 
 //To get the credit limit and balance from the API
 function getCreditAndBalance (token){
+	console.log("Inside CB ", token);
 	let options = {
 		method: 'GET',
         url: config.apiDomain + config.creditAndBalanceURL,
