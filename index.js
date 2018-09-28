@@ -193,6 +193,56 @@ alexaApp.intent('cardNumberIntent', async function (request, response) {
 	await handleQuery(request.getSession().details.accessToken, say, response);
 });
 
+//To handle the user input - Yes
+alexaApp.intent('yesIntent',async function (request, response) {
+	console.log("Inside yes Intent");
+    var say = [];
+	if(isblockCard){
+		//After completing the operation reset the flag
+		isblockCard = false;
+	} else if(isRecentTransactions){
+		//After completing the operation reset the flag
+		isRecentTransactions = false;
+	} else {
+		let say = ["I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card"];
+		response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
+		response.say(say.join('\n'));
+	}
+ });
+
+ //To handle the user input - No
+ alexaApp.intent('noIntent', function (request, response) {
+	 console.log("Inside no Intent");
+	var say = [];
+    if(isblockCard){
+		if(isExistingCard){
+			isExistingCard = false;
+			say = ["Sure,<break strength=\"medium\" /> Please provide the ID of the card you wish to block"];
+			response.shouldEndSession(false, "Tell me the ID of your card to be blocked");			
+		} else {
+			//After completing the operation reset the flag
+			isblockCard = false;
+			say = ["OK, Your card will not be blocked <break strength=\"medium\" />Is there anything I can help you with?"];
+			response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
+		}
+	} else if(isRecentTransactions){
+		if(isExistingCard){
+			isExistingCard = false;
+			say = ["Sure,<break strength=\"medium\" /> Please provide the ID of the card you wish to know"];
+			response.shouldEndSession(false, "Tell me the ID of your card to check the credit limit");
+		} else {
+			//After completing the operation reset the flag
+			isRecentTransactions = false;
+			say = ["OK <break strength=\"medium\" /> Is there anything I can help you with?"];
+			response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
+		}
+	} else {
+		say = [`ok <break strength=\"medium\" /> Happy to help you`];
+		response.shouldEndSession(true);
+	}
+    response.say(say.join('\n'));
+ });
+
 async function handleQuery(token, say, response){
 	if(isblockCard){
 		await getCardDetails(token).then((cardArray) => {
