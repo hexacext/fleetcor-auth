@@ -100,9 +100,7 @@ var api = {
 		return new Promise((resolve, reject) => {
 			requestModule(options, (error, response, body) => {
 				if (!error && response.statusCode == 200) {
-					var data = JSON.parse(body);
-					console.log(data);
-					return resolve(data);
+					return resolve();
 				} else {
 					console.log("error ", error);
 					return reject(error);
