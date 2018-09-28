@@ -67,7 +67,7 @@ var api = {
 		});
 	},
 	//To get the card details available for the user
-	getCardDetails: () => {
+	getCardDetails: (token) => {
 		let options = {
 			method: 'GET',
 			url: config.apiDomain + config.cardDetailsURL,
@@ -79,7 +79,6 @@ var api = {
 			requestModule(options, (error, response, body) => {
 				if (!error && response.statusCode === 200) {
 					var data = JSON.parse(body);
-					//console.log(data);
 					return resolve(data);
 				} else {
 					return reject(error);
