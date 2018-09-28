@@ -61,15 +61,15 @@ app.post('/accessToken', async (request, response) => {
 		password: 'Password@1'
 	};
 	await getAccessToken(request.body).then((token) => {
-		console.log("Completed");
-		response.send({
+		let details = {
 		  "access_token" : token.authorization.replace('Bearer ',''),
 		  "token_type" : "bearer",
-		  "expires_in" : 300,
+		  "expires_in" : 3600,
 		  "refresh_token" : token.refresh-token,
-		  "scope" : "profile",
-		  "owner_id" : "12345"
-		});
+		  "scope" : "profile"
+		};
+		console.log("Completed ", details);
+		response.send(details);
 	}).catch((error) => {
 		console.log("Error in accessToken ", error);
 	});
