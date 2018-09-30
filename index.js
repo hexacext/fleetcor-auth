@@ -74,7 +74,11 @@ app.post('/generateToken', async (request, response) => {
 app.post('/accessToken', async (request, response) => {
 	//console.log(request.body.code);
 	await alexaApp.db.loadCode(request.body.code).then((authData) => {
-		console.log(authData);
+		//console.log(authData);
+		authData.token_type = "bearer";
+		authData.expires_in = 360,
+		console.log("Send data ", authData);
+		response.send(authData);
 	}).catch((err) => {
 		console.log("Error in loading code ", err);
 	});
