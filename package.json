@@ -26,6 +26,7 @@
     "alexa-app": "^4.2.2",
     "body-parser": "^1.18.3",
     "express": "^4.16.3",
-    "request": "^2.88.0"
+    "request": "^2.88.0",
+    "uid": "0.0.2"
   }
 }

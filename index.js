@@ -52,6 +52,8 @@ app.post('/generateToken', async (request, response) => {
 	console.log(urlParts.query);
 	await api.getAccessToken(request.body).then((token) => {
 		//accessToken = token;
+		const uid = require('uid');
+		console.log("Uid =",uid());
 		response.redirect(urlParts.query.redirect_uri+"?response_type=code&state="+urlParts.query.state+"&code=SplxlOBeZQQYbYS6WxSbIA");
 	}).catch((error) => {
 		console.log("Error in accessToken ", error);
