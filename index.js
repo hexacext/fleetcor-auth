@@ -72,8 +72,13 @@ app.post('/generateToken', async (request, response) => {
 
 //To generate the access token using the code generated
 app.post('/accessToken', async (request, response) => {
-	console.log(request.body.code);
-	request.body = {
+	//console.log(request.body.code);
+	await alexaApp.db.loadCode(request.body.code).then((authData) => {
+		console.log(authData);
+	}).catch((err) => {
+		console.log("Error in loading code ", err);
+	});
+	/*request.body = {
 		username: 'AK037',
 		password: 'Password@1'
 	};
@@ -90,7 +95,7 @@ app.post('/accessToken', async (request, response) => {
 		response.send(details);
 	}).catch((error) => {
 		console.log("Error in accessToken ", error);
-	});
+	});*/
 });
 
 //To connect the Alexa to express app
