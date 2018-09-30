@@ -57,8 +57,8 @@ app.post('/generateToken', async (request, response) => {
 		const uid = require('uid');
 		let code = uid(),
 		authData = {
-			accessToken: token.authorization.replace('Bearer ',''),
-			refreshToken: token["refresh-token"]
+			access_token: token.authorization.replace('Bearer ',''),
+			refresh_token: token["refresh-token"]
 		};
 		alexaApp.db.saveCode(code, authData).then(() => {
 			response.redirect(`${urlParts.query.redirect_uri}?response_type=code&state=${urlParts.query.state}&code=${code}`);
