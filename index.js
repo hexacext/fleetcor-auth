@@ -76,7 +76,7 @@ app.post('/accessToken', async (request, response) => {
 	await alexaApp.db.loadCode(request.body.code).then((authData) => {
 		//console.log(authData);
 		authData.token_type = "bearer";
-		authData.expires_in = 360,
+		authData.expires_in = 3600,
 		console.log("Send data ", authData);
 		response.send(authData);
 	}).catch((err) => {
