@@ -32,6 +32,7 @@ module.exports = {
 			let json = authorize;
 			json.users[code] = authData;
 			json = JSON.stringify(json);
+			console.log("String ",json);
 			require('fs').writeFile('./auth-data.json', json, 'utf-8', (err) => {
 				if(err){
 					//console.log("Err in saveCode ", err);
