@@ -53,14 +53,14 @@ app.post('/generateToken', async (request, response) => {
 	const url = require('url');
 	let urlParts = url.parse(request.headers.referer, true);
 	console.log(urlParts.query);
-	await api.getAccessToken(request.body).then(async (token) => {
+	await api.getAccessToken(request.body).then((token) => {
 		const uid = require('uid');
 		let code = uid(),
 		authData = {
 			accessToken: token.authorization.replace('Bearer ',''),
 			refreshToken: token["refresh-token"]
 		};
-		await alexaApp.db.saveCode(code, authData).then(() => {
+		alexaApp.db.saveCode(code, authData).then(() => {
 			response.redirect(`${urlParts.query.redirect_uri}?response_type=code&state=${urlParts.query.state}&code=${code}`);
 		}).catch((err) => {
 			console.log("Unable to save code",err);
