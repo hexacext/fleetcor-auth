@@ -22,9 +22,9 @@ module.exports = {
     },
 
     loadCode: (code) => {
-		console.log("code in session ",code);
+		console.log("code in session ", authorize);
 		return new Promise((resolve) => {
-			return resolve(code.users[code]);
+			return resolve(authorize.users[code]);
 		});
 	},
 	
