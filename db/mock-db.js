@@ -1,26 +1,36 @@
 var Promise = require('bluebird'),
-    data = require('./mock-data.json');
+    data = require('./mock-data.json')
+	authorize = require('./auth-data.json');
 
 module.exports = {
     label: 'mock',
 
-    loadSession: function(userId) {
+    loadUserSession: (userId) => {
         console.log('mock-db.loadSession '+userId);
-        return new Promise(function(resolve) {
+        return new Promise((resolve) => {
 			console.log(data.users[userId]);
             return resolve(data.users[userId]);
         });
     },
 
-    saveSession: function(userId, session) {
+    saveUserSession: (userId, session) => {
         console.log('mock-db.saveSession '+userId);
-        return new Promise(function(resolve) {
+        return new Promise((resolve) => {
             var saved = data.users[userId] || {};
             return resolve(Object.assign(saved, session));
         });
     },
 
-    logAnswer: function(questionId, answer) {
-        console.log('mock-db.logAnswer '+questionId+'='+answer);
-    },
+    loadCode: (code) => {
+		return new Promise((resolve) => {
+			return resolve(code.users[code]);
+		});
+	},
+	
+	saveCode: (code, authData) => {
+		return new Promise((resolve) => {
+			var saved = code.users[code] || {};
+			return resolve(Object.assign(saved, authData));
+		});
+	}
 };

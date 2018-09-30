@@ -12,6 +12,9 @@ const server = app.listen(process.env.PORT || 5000, () => {
     console.log('Express server listening on port %d in %s mode', server.address().port, app.settings.env);
 });
 
+//To maintain and load data to session
+alexaApp.db = require('./db/mock-db');
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname));
@@ -50,11 +53,16 @@ app.post('/generateToken', async (request, response) => {
 	const url = require('url');
 	let urlParts = url.parse(request.headers.referer, true);
 	console.log(urlParts.query);
-	await api.getAccessToken(request.body).then((token) => {
-		//accessToken = token;
+	await api.getAccessToken(request.body).then(async (token) => {
 		const uid = require('uid');
-		console.log("Uid =",uid());
-		response.redirect(urlParts.query.redirect_uri+"?response_type=code&state="+urlParts.query.state+"&code=SplxlOBeZQQYbYS6WxSbIA");
+		let code = uid();
+		await alexaApp.db.saveCode(code, 
+		{
+			accessToken: token.authorization.replace('Bearer ',''),
+			refreshToken: token["refresh-token"]
+		}).then(() => {
+			response.redirect(`${urlParts.query.redirect_uri}?response_type=code&state=${urlParts.query.state}&code=${code}`);
+		});
 	}).catch((error) => {
 		console.log("Error in accessToken ", error);
 	});
@@ -62,6 +70,7 @@ app.post('/generateToken', async (request, response) => {
 
 //To generate the access token using the code generated
 app.post('/accessToken', async (request, response) => {
+	await alexaApp.db.loadCode(request.body);
 	request.body = {
 		username: 'AK037',
 		password: 'Password@1'
