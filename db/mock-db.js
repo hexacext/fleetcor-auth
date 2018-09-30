@@ -28,9 +28,18 @@ module.exports = {
 	},
 	
 	saveCode: (code, authData) => {
-		return new Promise((resolve) => {
-			var saved = code.users[code] || {};
-			return resolve(Object.assign(saved, authData));
+		return new Promise((resolve, reject) => {
+			let json = authorize;
+			json.users[code] = authData;
+			json = JSON.stringify(json);
+			require('fs').writeFile('./auth-data.json', json, 'utf-8', (err) => {
+				if(err){
+					//console.log("Err in saveCode ", err);
+					return reject(err);
+				} else {
+					return resolve();
+				}
+			});
 		});
 	}
 };
