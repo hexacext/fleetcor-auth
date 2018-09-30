@@ -72,7 +72,7 @@ app.post('/generateToken', async (request, response) => {
 
 //To generate the access token using the code generated
 app.post('/accessToken', async (request, response) => {
-	console.log(request.body);
+	console.log(request.body.code);
 	request.body = {
 		username: 'AK037',
 		password: 'Password@1'
