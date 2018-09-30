@@ -22,6 +22,7 @@ module.exports = {
     },
 
     loadCode: (code) => {
+		console.log("code in session ",code);
 		return new Promise((resolve) => {
 			return resolve(code.users[code]);
 		});
