@@ -352,6 +352,7 @@ alexaApp.intent('AMAZON.FallbackIntent', function (request, response) {
 
 //To handle the queries in common
 async function handleQuery(token, say, response){
+	console.log("Inside handle query");
 	if(request.getSession().details.attributes.isblockCard){
 		console.log("Inside block card handle");
 		await api.getCardDetails(token, request.getSession().details.attributes.cardId).then((cardDetails) => {

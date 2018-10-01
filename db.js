@@ -55,6 +55,7 @@ var mongodb = {
 		});
 	},
 	updateSession: (userId, cardId) => {
+		console.log("Inside updateSession");
 		return new Promise(function(resolve, reject){
 			MongoClient.connect(process.env.MONGODB_URL + process.env.MONGODB_NAME, function(err, db) {
 				console.log("Inside db");
