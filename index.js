@@ -53,7 +53,7 @@ app.post('/generateToken', async (request, response) => {
 	console.log(urlParts.query);
 	await api.getAccessToken(request.body).then((token) => {
 		const uid = require('uid');
-		authData = {
+		let authData = {
 			code: uid(),
 			accessToken: token.authorization.replace('Bearer ',''),
 			refreshToken: token["refresh-token"]
