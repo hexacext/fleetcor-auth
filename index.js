@@ -5,15 +5,13 @@ const express = require('express'),
     alexa = require('alexa-app'),
     app = express(),
     alexaApp = new alexa.app("fleetcorauth"),
-	api = require('./api');
+	api = require('./api'),
+	db = require('./db');
 
 //create server to listen to port from the environment variable or 5000
 const server = app.listen(process.env.PORT || 5000, () => {
     console.log('Express server listening on port %d in %s mode', server.address().port, app.settings.env);
 });
-
-//To maintain and load data to session
-alexaApp.db = require('./db/mock-db');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -55,13 +53,13 @@ app.post('/generateToken', async (request, response) => {
 	console.log(urlParts.query);
 	await api.getAccessToken(request.body).then((token) => {
 		const uid = require('uid');
-		let code = uid(),
 		authData = {
-			access_token: token.authorization.replace('Bearer ',''),
-			refresh_token: token["refresh-token"]
+			code: uid(),
+			accessToken: token.authorization.replace('Bearer ',''),
+			refreshToken: token["refresh-token"]
 		};
-		alexaApp.db.saveCode(code, authData).then(() => {
-			response.redirect(`${urlParts.query.redirect_uri}?response_type=code&state=${urlParts.query.state}&code=${code}`);
+		db.updateCode(authData).then(() => {
+			response.redirect(`${urlParts.query.redirect_uri}?response_type=code&state=${urlParts.query.state}&code=${authData.code}`);
 		}).catch((err) => {
 			console.log("Unable to save code",err);
 		});
@@ -70,10 +68,9 @@ app.post('/generateToken', async (request, response) => {
 	});
 });
 
-//To generate the access token using the code generated
+//To send the access token using the code generated
 app.post('/accessToken', async (request, response) => {
-	//console.log(request.body.code);
-	await alexaApp.db.loadCode(request.body.code).then((authData) => {
+	await db.loadCode(request.body.code).then((authData) => {
 		console.log("Inside auth code");
 		authData.token_type = "bearer";
 		authData.expires_in = 3600,
@@ -82,24 +79,6 @@ app.post('/accessToken', async (request, response) => {
 	}).catch((err) => {
 		console.log("Error in loading code ", err);
 	});
-	/*request.body = {
-		username: 'AK037',
-		password: 'Password@1'
-	};
-	await api.getAccessToken(request.body).then((token) => {
-		console.log("Token ", token);
-		let details = {
-		  "access_token" : token.authorization.replace('Bearer ',''),
-		  "token_type" : "bearer",
-		  "expires_in" : 360,
-		  "refresh_token" : token["refresh-token"],
-		  "scope" : "profile"
-		};
-		console.log("Completed ", details);
-		response.send(details);
-	}).catch((error) => {
-		console.log("Error in accessToken ", error);
-	});*/
 });
 
 //To connect the Alexa to express app
