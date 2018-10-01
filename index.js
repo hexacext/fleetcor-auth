@@ -174,7 +174,7 @@ alexaApp.intent('accountBalanceIntent',async (request, response) => {
 
 //To handle the block card queries
 alexaApp.intent('blockCardIntent', async function (request, response) {
-	console.log("Inside block Intent");
+	console.log("Inside block Intent ", request.getSession());
     response.session('isblockCard', true);
     let say = [];
 	//Check if the card id is given in utterance/ user input
