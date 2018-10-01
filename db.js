@@ -63,7 +63,7 @@ var mongodb = {
 					console.log("Error in getting connection ", err);
 					return reject(err);
 				} else {	  
-					db.collection("fleetcor_code").updateOne({"userId": userId}, {$set: {"cardId": cardId}}, {upsert: true} , 
+					db.collection("fleetcor_session").updateOne({"userId": userId}, {$set: {"cardId": cardId}}, {upsert: true} , 
 					function(error, result){
 						if(error){
 							console.log("Error in updateCode ", error);

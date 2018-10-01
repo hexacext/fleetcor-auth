@@ -187,7 +187,7 @@ alexaApp.intent('blockCardIntent', async function (request, response) {
 		}).catch((error) => {
 			console.log("Error in saving card details");
 		});
-		await handleQuery(request.getSession().details.accessToken, say, response);
+		await handleQuery(request, request.getSession().details.accessToken, say, response);
 	} else {
 		//Check if card id is already stored in session
 		if(request.getSession().details.attributes.cardId > 0){
@@ -218,7 +218,7 @@ alexaApp.intent('cardNumberIntent', async function (request, response) {
 	}).catch((error) => {
 		console.log("Error in saving card details");
 	});
-	await handleQuery(request.getSession().details.accessToken, say, response);
+	await handleQuery(request, request.getSession().details.accessToken, say, response);
 });
 
 //To handle the user input - Yes
@@ -288,7 +288,7 @@ alexaApp.intent('transactionsIntent', async function(request, response){
 	let say = [];
 	if(request.data.request.intent.slots.transactionNumber.value){
 		cardId = request.data.request.intent.slots.transactionNumber.value;
-		await handleQuery(say, response);
+		await handleQuery(request, say, response);
 	} else {
 		if(cardId.trim() != ""){
 			response.session('isExistingCard', true);
@@ -351,7 +351,7 @@ alexaApp.intent('AMAZON.FallbackIntent', function (request, response) {
 });
 
 //To handle the queries in common
-async function handleQuery(token, say, response){
+async function handleQuery(request, token, say, response){
 	console.log("Inside handle query");
 	if(request.getSession().details.attributes.isblockCard){
 		console.log("Inside block card handle");
