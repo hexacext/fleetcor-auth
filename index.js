@@ -107,7 +107,7 @@ alexaApp.launch(async (request, response) => {
 			response.session('isExistingCard', false);
 			response.session('cardId', 0);
 			response.session('cardDetailsJson', {});
-			db.loadSession(userId).then((sessionDetails) => {
+			db.loadSession(request.userId).then((sessionDetails) => {
 				if(sessionDetails == 0){
 					console.log("No session value loading card id to zero");
 				} else {
@@ -299,8 +299,7 @@ alexaApp.intent('transactionsIntent', async function(request, response){
 			response.session('isExistingCard', false);
 			say = ["Sure,<break strength=\"medium\" /> Please provide the last 4 digits of the card you wish to know"];
 			response.shouldEndSession(false, "Tell me the last 4 digits of your card to check the transactions");
-			response.say(say.join('\n'));
-			
+			response.say(say.join('\n'));			
 		}
 	}
 });
