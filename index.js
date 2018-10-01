@@ -17,34 +17,11 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname));
 
-var isblockCard = false;
-var isRecentTransactions = false;
-var isExistingCard = false;
-var cardId = "";
-var cardDetailsJson = {};
-var accessTokenJson = {}; //Maintain in a separate session object
-
 //For Authentication
 app.get('/login', (request, response) => {
 	response.sendFile(__dirname + '/login.html');
 });
 
-//For implicit Grant Type
-/*app.post('/generateToken', async (request, response) => {
-	console.log("Inside generateToken ", request.body, request.query);
-	//console.log("header url ",request.headers.referer);
-	const url = require('url');
-	let urlParts = url.parse(request.headers.referer, true);
-	console.log(urlParts.query);
-	await api.getAccessToken(request.body).then((token) => {
-		console.log("Before redirect ");
-		response.redirect(urlParts.query.redirect_uri+"#state="+urlParts.query.state+"&token_type=Bearer&access_token="+token.authorization.replace('Bearer ',''));
-	}).catch((error) => {
-		console.log("Error in accessToken ", error);
-	});
-});*/
-
-//For Auth code Grant Type
 //To generate the code after authorization
 app.post('/generateToken', async (request, response) => {
 	console.log("Inside generateToken ");
@@ -52,17 +29,21 @@ app.post('/generateToken', async (request, response) => {
 	let urlParts = url.parse(request.headers.referer, true);
 	console.log(urlParts.query);
 	await api.getAccessToken(request.body).then((token) => {
-		const uid = require('uid');
-		let authData = {
-			code: uid(),
-			accessToken: token.authorization.replace('Bearer ',''),
-			refreshToken: token["refresh-token"]
-		};
-		db.updateCode(authData).then(() => {
-			response.redirect(`${urlParts.query.redirect_uri}?response_type=code&state=${urlParts.query.state}&code=${authData.code}`);
-		}).catch((err) => {
-			console.log("Unable to save code",err);
-		});
+		if(token == " "){
+			console.log("Username and password does not match");
+		} else {
+			const uid = require('uid');
+			let authData = {
+				code: uid(),
+				accessToken: token.authorization.replace('Bearer ',''),
+				refreshToken: token["refresh-token"]
+			};
+			db.updateCode(authData).then(() => {
+				response.redirect(`${urlParts.query.redirect_uri}?response_type=code&state=${urlParts.query.state}&code=${authData.code}`);
+			}).catch((err) => {
+				console.log("Unable to save code",err);
+			});
+		}
 	}).catch((error) => {
 		console.log("Error in accessToken ", error);
 	});
@@ -71,11 +52,16 @@ app.post('/generateToken', async (request, response) => {
 //To send the access token using the code generated
 app.post('/accessToken', async (request, response) => {
 	await db.loadCode(request.body.code).then((authData) => {
-		console.log("Inside auth code");
-		authData.token_type = "bearer";
-		authData.expires_in = 3600,
-		console.log("Send data ", authData);
-		response.send(authData);
+		console.log("Inside auth code ", request.headers);
+		if(authData == 0){
+			//Change the code to refresh the token
+			response.send(authData);
+		} else {
+			authData.token_type = "bearer";
+			authData.expires_in = 3600,
+			console.log("Send data ", authData);
+			response.send(authData);
+		}
 	}).catch((err) => {
 		console.log("Error in loading code ", err);
 	});
@@ -115,6 +101,23 @@ alexaApp.launch(async (request, response) => {
 			<break strength="medium" />What can I do for you today`); 
 			response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");			
 			response.say(say.join('\n'));
+			//By default set the following query flags to false
+			response.session('isblockCard', false);
+			response.session('isRecentTransactions', false);
+			response.session('isExistingCard', false);
+			response.session('cardId', 0);
+			response.session('cardDetailsJson', {});
+			db.loadSession(userId).then((sessionDetails) => {
+				if(sessionDetails == 0){
+					console.log("No session value loading card id to zero");
+				} else {
+					console.log("Last accessed card ", sessionDetails.cardId);
+					response.session('cardId', sessionDetails.cardId);
+				}
+			}).catch((errors) => {
+				console.log("Error in getting session details ", errors);
+			});
+			console.log("Before send");
 			response.send();
 		}).catch((error) => {
 			console.log("Error in acc link ", error);
@@ -172,23 +175,29 @@ alexaApp.intent('accountBalanceIntent',async (request, response) => {
 //To handle the block card queries
 alexaApp.intent('blockCardIntent', async function (request, response) {
 	console.log("Inside block Intent");
-    isblockCard = true;
+    response.session('isblockCard', true);
     let say = [];
 	//Check if the card id is given in utterance/ user input
 	if(request.data.request.intent.slots.lastFour.value){
-		cardId = request.data.request.intent.slots.lastFour.value;
+		//cardId = request.data.request.intent.slots.lastFour.value;
+		db.updateSession(request.userId, request.data.request.intent.slots.lastFour.value)
+		.then(() => {
+			console.log("Card Id ",request.userId, request.data.request.intent.slots.lastFour.value, "saved successfully");
+		}).catch((error) => {
+			console.log("Error in saving card details");
+		});
 		await handleQuery(request.getSession().details.accessToken, say, response);
 	} else {
 		//Check if card id is already stored in session
-		if(cardId.trim() != ""){
-			isExistingCard = true;
-			say = [`Sure,<break strength=\"medium\" /> Do you want to block the card with ID <say-as interpret-as='digits'> ${cardId} </say-as>`];
-			response.shouldEndSession(false, `Tell me Yes <break strength=\"medium\" /> to block the card <say-as interpret-as='digits'> ${cardId} </say-as>
+		if(request.getSession().cardId.trim() > 0){
+			response.session('isExistingCard', true);
+			say = [`Sure,<break strength=\"medium\" /> Do you want to block the card with ID <say-as interpret-as='digits'> ${request.getSession().cardId} </say-as>`];
+			response.shouldEndSession(false, `Tell me Yes <break strength=\"medium\" /> to block the card <say-as interpret-as='digits'> ${request.getSession().cardId} </say-as>
 			<break strength=\"medium\" />or No <break strength=\"medium\" /> to check for other card`);
 			response.say(say.join('\n'));
 		} else {
 			//Get card id from user
-			isExistingCard = false;
+			response.session('isExistingCard', false);
 			say = ["Sure,<break strength=\"medium\" /> Please provide the ID for the card you wish to block"];
 			response.shouldEndSession(false, "Tell me the ID for the card to be blocked");
 			response.say(say.join('\n'));
@@ -201,7 +210,13 @@ alexaApp.intent('cardNumberIntent', async function (request, response) {
 	console.log("Inside CN Intent");
     var say = [];
     console.log(request.data.request.intent.slots.cardNumber.value)
-    cardId = request.data.request.intent.slots.cardNumber.value;
+    //cardId = request.data.request.intent.slots.cardNumber.value;
+	db.updateSession(request.userId, request.data.request.intent.slots.cardNumber.value)
+	.then(() => {
+		console.log("Card Id ",request.userId, request.data.request.intent.slots.cardNumber.value, "saved successfully");
+	}).catch((error) => {
+		console.log("Error in saving card details");
+	});
 	await handleQuery(request.getSession().details.accessToken, say, response);
 });
 
@@ -209,11 +224,11 @@ alexaApp.intent('cardNumberIntent', async function (request, response) {
 alexaApp.intent('yesIntent',async function (request, response) {
 	console.log("Inside yes Intent");
     var say = [];
-	if(isblockCard){
+	if(request.getSession().isblockCard){
 		//After completing the operation reset the flag
-		isblockCard = false;
-		await api.blockCard(request.getSession().details.accessToken, cardId, cardDetailsJson).then(() => {
-			cardId = ""; //Once the card is blocked reset the value
+		response.session('isblockCard', false);
+		await api.blockCard(request.getSession().details.accessToken, request.getSession().cardId, request.getSession().cardDetailsJson).then(() => {
+			response.session("cardId", 0); //Once the card is blocked reset the value
 			say = ["Your card has been blocked successfully <break strength=\"medium\" /> Is there anything I can help you with?"];
 			response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
 			response.say(say.join('\n'));
@@ -222,9 +237,9 @@ alexaApp.intent('yesIntent',async function (request, response) {
 			response.shouldEndSession(true);
 			response.say(say.join('\n'));
 		});
-	} else if(isRecentTransactions){
+	} else if(request.getSession().isRecentTransactions){
 		//After completing the operation reset the flag
-		isRecentTransactions = false;
+		response.session('isRecentTransactions', false);
 	} else {
 		let say = ["I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card"];
 		response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
@@ -236,25 +251,25 @@ alexaApp.intent('yesIntent',async function (request, response) {
  alexaApp.intent('noIntent', function (request, response) {
 	 console.log("Inside no Intent");
 	var say = [];
-    if(isblockCard){
-		if(isExistingCard){
-			isExistingCard = false;
+    if(request.getSession().isblockCard){
+		if(request.getSession().isExistingCard){
+			response.session('isExistingCard', false);
 			say = ["Sure,<break strength=\"medium\" /> Please provide the ID of the card you wish to block"];
 			response.shouldEndSession(false, "Tell me the ID of your card to be blocked");			
 		} else {
 			//After completing the operation reset the flag
-			isblockCard = false;
+			response.session('isblockCard', false);
 			say = ["OK, Your card will not be blocked <break strength=\"medium\" />Is there anything I can help you with?"];
 			response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
 		}
-	} else if(isRecentTransactions){
-		if(isExistingCard){
-			isExistingCard = false;
+	} else if(request.getSession().isRecentTransactions){
+		if(request.getSession().isExistingCard){
+			response.session('isExistingCard', false);
 			say = ["Sure,<break strength=\"medium\" /> Please provide the ID of the card you wish to know"];
 			response.shouldEndSession(false, "Tell me the ID of your card to check the credit limit");
 		} else {
 			//After completing the operation reset the flag
-			isRecentTransactions = false;
+			response.session('isRecentTransactions', false);
 			say = ["OK <break strength=\"medium\" /> Is there anything I can help you with?"];
 			response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
 		}
@@ -268,20 +283,20 @@ alexaApp.intent('yesIntent',async function (request, response) {
  //To handle the recent transaction queries
 alexaApp.intent('transactionsIntent', async function(request, response){
 	console.log("Inside Trans Intent ");
-	isRecentTransactions = true;
+	response.session('isRecentTransactions', true);
 	let say = [];
 	if(request.data.request.intent.slots.transactionNumber.value){
-		lastFour = request.data.request.intent.slots.transactionNumber.value;
+		cardId = request.data.request.intent.slots.transactionNumber.value;
 		await handleQuery(say, response);
 	} else {
-		if(lastFour.trim() != ""){
-			isExistingCard = true;
-			say = [`Sure,<break strength=\"medium\" /> Do you want to check the transactions for card ending with <say-as interpret-as='digits'> ${lastFour} </say-as>`];
-			response.shouldEndSession(false, `Tell me Yes <break strength=\"medium\" /> to check the transactions <say-as interpret-as='digits'> ${lastFour} </say-as>
+		if(cardId.trim() != ""){
+			response.session('isExistingCard', true);
+			say = [`Sure,<break strength=\"medium\" /> Do you want to check the transactions for card ending with <say-as interpret-as='digits'> ${cardId} </say-as>`];
+			response.shouldEndSession(false, `Tell me Yes <break strength=\"medium\" /> to check the transactions <say-as interpret-as='digits'> ${cardId} </say-as>
 			<break strength=\"medium\" />or No <break strength=\"medium\" /> to check for other card`);
 			response.say(say.join('\n'));
 		} else {
-			isExistingCard = false;
+			response.session('isExistingCard', false);
 			say = ["Sure,<break strength=\"medium\" /> Please provide the last 4 digits of the card you wish to know"];
 			response.shouldEndSession(false, "Tell me the last 4 digits of your card to check the transactions");
 			response.say(say.join('\n'));
@@ -291,9 +306,9 @@ alexaApp.intent('transactionsIntent', async function(request, response){
 });
  
  alexaApp.intent('AMAZON.StopIntent', function (request, response) {
-	isblockCard = false;
-	isRecentTransactions = false;
-	isExistingCard = false;
+	response.session('isblockCard', false);
+	response.session('isRecentTransactions', false);
+	response.session('isExistingCard', false);
 	console.log("Inside stop Intent");
     let say = ["Happy to help you! Good bye"];
     response.shouldEndSession(true);
@@ -308,9 +323,9 @@ alexaApp.intent('AMAZON.HelpIntent', function (request, response) {
 });
 
 alexaApp.intent('AMAZON.CancelIntent', function (request, response) {
-	isblockCard = false;
-	isRecentTransactions = false;
-	isExistingCard = false;
+	response.session('isblockCard', false);
+	response.session('isRecentTransactions', false);
+	response.session('isExistingCard', false);
 	console.log("Inside cancel Intent");
     let say = ["Happy to help you! Good bye"];
     response.shouldEndSession(true);
@@ -319,9 +334,9 @@ alexaApp.intent('AMAZON.CancelIntent', function (request, response) {
 
 //To handle if user wants to end the conversation
 alexaApp.intent('thankIntent', function (request, response) {
-	isblockCard = false;
-	isRecentTransactions = false;
-	isExistingCard = false;
+	response.session('isblockCard', false);
+	response.session('isRecentTransactions', false);
+	response.session('isExistingCard', false);	
 	console.log("Inside thank Intent");
     var say =["<s> Happy to help you!</s><break strength=\"medium\" /> Good bye"];
     response.shouldEndSession(true);
@@ -337,22 +352,22 @@ alexaApp.intent('AMAZON.FallbackIntent', function (request, response) {
 
 //To handle the queries in common
 async function handleQuery(token, say, response){
-	if(isblockCard){
+	if(request.getSession().isblockCard){
 		console.log("Inside block card handle");
-		await api.getCardDetails(token, cardId).then((cardDetails) => {
+		await api.getCardDetails(token, request.getSession().cardId).then((cardDetails) => {
 			if(cardDetails){
-				cardDetailsJson = cardDetails;
+				response.session('cardDetailsJson', cardDetails);
 				say = [`The card once blocked cannot be unblocked <break strength=\"medium\" /> it can only be re-issued <break strength=\"x-strong\" /> 
-				Are you sure <break strength=\"medium\" /> you want to block the card with ID <say-as interpret-as='digits'> ${cardId} </say-as>`];
+				Are you sure <break strength=\"medium\" /> you want to block the card with ID <say-as interpret-as='digits'> ${request.getSession().cardId} </say-as>`];
 				response.shouldEndSession(false, "Say Yes to block <break strength=\"medium\" /> or No to not block the card");
 				response.say(say.join('\n'));
 			} else {
 				//After completing the operation reset the flag
-				isblockCard = false;
-				say = [`Please check <break strength=\"medium\" /> There is no card with ID <say-as interpret-as='digits'> ${cardId} </say-as>
+				response.session('isblockCard', false);
+				say = [`Please check <break strength=\"medium\" /> There is no card with ID <say-as interpret-as='digits'> ${request.getSession().cardId} </say-as>
 				<break strength=\"medium\" />Is there anything I can help you with?`];
-				cardId = "";
-				console.log("cardId ", cardId);
+				response.session("cardId", 0);
+				console.log("cardId ", request.getSession().cardId);
 				response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
 				response.say(say.join('\n'));
 			}

@@ -38,6 +38,8 @@ var api = {
 			requestModule(options, (error, response, body) => {
 				if (!error && response.statusCode == 200) {
 					return resolve(response.headers);
+				} else if(response.statusCode == 400){
+					return resolve(" ");
 				} else {
 					console.log("error ", error);
 					return reject(error);
