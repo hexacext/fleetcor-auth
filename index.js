@@ -182,14 +182,14 @@ alexaApp.intent('blockCardIntent', async function (request, response) {
 		//cardId = request.data.request.intent.slots.lastFour.value;
 		db.updateSession(request.userId, request.data.request.intent.slots.lastFour.value)
 		.then(() => {
-			console.log("Card Id ",request.userId, request.data.request.intent.slots.lastFour.value, "saved successfully");
+			console.log("Card Id ", request.data.request.intent.slots.lastFour.value, "saved successfully");
 		}).catch((error) => {
 			console.log("Error in saving card details");
 		});
 		await handleQuery(request.getSession().details.accessToken, say, response);
 	} else {
 		//Check if card id is already stored in session
-		if(request.getSession().details.attributes.cardId.trim() > 0){
+		if(request.getSession().details.attributes.cardId > 0){
 			response.session('isExistingCard', true);
 			say = [`Sure,<break strength=\"medium\" /> Do you want to block the card with ID <say-as interpret-as='digits'> ${request.getSession().details.attributes.cardId} </say-as>`];
 			response.shouldEndSession(false, `Tell me Yes <break strength=\"medium\" /> to block the card <say-as interpret-as='digits'> ${request.getSession().details.attributes.cardId} </say-as>
