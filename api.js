@@ -18,7 +18,7 @@ var api = {
 				if (!error && response.statusCode === 200) {
 					var data = JSON.parse(body);
 					return resolve(data);
-				} else if(response.statusCode == 400){
+				} else if(response.statusCode == 401){
 					return resolve(" ");
 				} else {
 					console.log("SC ",response.statusCode);
