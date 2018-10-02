@@ -184,11 +184,10 @@ alexaApp.intent('blockCardIntent', async function (request, response) {
 		db.updateSession(request.userId, request.data.request.intent.slots.lastFour.value)
 		.then(() => {
 			console.log("Card Id ", request.data.request.intent.slots.lastFour.value, "saved successfully");
-			await handleQuery(request, request.getSession().details.accessToken, say, response);
 		}).catch((error) => {
 			console.log("Error in saving card details");
-			await handleQuery(request, request.getSession().details.accessToken, say, response);
-		});		
+		});
+		await handleQuery(request, request.getSession().details.accessToken, say, response);
 	} else {
 		//Check if card id is already stored in session
 		if(request.getSession().details.attributes.cardId > 0){
@@ -216,11 +215,10 @@ alexaApp.intent('cardNumberIntent', async function (request, response) {
 	db.updateSession(request.userId, request.data.request.intent.slots.cardNumber.value)
 	.then(() => {
 		console.log("Card Id ",request.userId, request.data.request.intent.slots.cardNumber.value, "saved successfully");
-		await handleQuery(request, request.getSession().details.accessToken, say, response);
 	}).catch((error) => {
 		console.log("Error in saving card details");
-		await handleQuery(request, request.getSession().details.accessToken, say, response);
-	});	
+	});
+	await handleQuery(request, request.getSession().details.accessToken, say, response);
 });
 
 //To handle the user input - Yes
