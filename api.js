@@ -6,6 +6,7 @@ const requestModule = require('request'),
 var api = {
 	//To get the user details using the accessToken
 	getUserDetails: (token) => {
+		console.log("Inside get user details API");
 		let options = {
 			method: 'GET',
 			url: config.apiDomain + config.userProfileURL,
@@ -29,6 +30,7 @@ var api = {
 	},
 	//To get the access Token using the username and password
 	getAccessToken: (credentials) => {
+		console.log("Inside get access token API");
 		let options = {
 			url: config.apiDomain + config.accessTokenURL,
 			method: 'POST',
@@ -50,8 +52,35 @@ var api = {
 			});
 		});
 	},
+	//To renew the session using the access token and refresh token
+	renewSession: (data) => {
+		console.log("Inside the renew Session API");
+		let options = {
+			url: config.apiDomain + config.renewSessionURL,
+			method: 'POST',
+			headers: {
+				authorization: 'Bearer ' + data.token, //Bearer Token
+			},
+			json: {
+				refreshToken: data.refreshToken
+			}
+		};
+		return new Promise((resolve, reject) => {
+			requestModule(options, (error, response, body) => {
+				if (!error && response.statusCode == 200) {
+					return resolve(response.headers);
+				} else if(response.statusCode == 400){
+					return resolve(" ");
+				} else {
+					console.log("error ", error);
+					return reject(error);
+				}
+			});
+		});
+	},
 	//To get the credit limit and balance from the API
 	getCreditAndBalance: (token) => {
+		console.log("Inside get credit and balance API");
 		let options = {
 			method: 'GET',
 			url: config.apiDomain + config.creditAndBalanceURL,
@@ -73,6 +102,7 @@ var api = {
 	},
 	//To get the card details available for the user
 	getCardDetails: (token, cardId) => {
+		console.log("Inside get card details API");
 		let options = {
 			method: 'GET',
 			url: config.apiDomain + config.cardDetailsURL.replace('CARD_ID',cardId),
@@ -93,7 +123,7 @@ var api = {
 	},
 	//To block the user card using the card id
 	blockCard: (token, cardId, cardJson) => {
-		//console.log(token, cardId, cardJson);
+		console.log("Inside block card API");
 		let options = {
 			url: config.apiDomain + config.blockCardURL.replace('CARD_ID',cardId),
 			method: 'PUT',

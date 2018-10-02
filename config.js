@@ -4,6 +4,7 @@ config ={
 	"creditAndBalanceURL" : "api/businesses/me",
 	"userProfileURL"	  : "api/users/me",
 	"cardDetailsURL"	  : "api/cards/CARD_ID",
-	"blockCardURL"		  : "api/cards/CARD_ID"
+	"blockCardURL"		  : "api/cards/CARD_ID",
+	"renewSessionURL"	  : "api/sessions/renew"
 }
 module.exports = config;

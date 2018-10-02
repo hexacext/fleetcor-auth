@@ -8,7 +8,7 @@ var mongodb = {
 	updateCode: (authData) => {
 		return new Promise(function(resolve, reject){
 			MongoClient.connect(process.env.MONGODB_URL + process.env.MONGODB_NAME, function(err, db) {
-				console.log("Inside db");
+				console.log("Inside update code db");
 				if (err) { 
 					console.log("Error in getting connection ", err);
 					return reject(err);
@@ -31,7 +31,7 @@ var mongodb = {
 	loadCode: (code) => {
 		return new Promise(function(resolve, reject){
 			MongoClient.connect(process.env.MONGODB_URL + process.env.MONGODB_NAME, function(err, db) {
-				console.log("Inside db");
+				console.log("Inside load code db");
 				if (err) { 
 					console.log("Error in getting connection ", err);
 					return reject(err);
@@ -55,7 +55,7 @@ var mongodb = {
 		});
 	},
 	updateSession: (userId, cardId) => {
-		console.log("Inside updateSession");
+		console.log("Inside update Session db");
 		return new Promise(function(resolve, reject){
 			MongoClient.connect(process.env.MONGODB_URL + process.env.MONGODB_NAME, function(err, db) {
 				console.log("Inside db");
@@ -81,7 +81,7 @@ var mongodb = {
 	loadSession: (userId) => {
 		return new Promise(function(resolve, reject){
 			MongoClient.connect(process.env.MONGODB_URL + process.env.MONGODB_NAME, function(err, db) {
-				console.log("Inside db");
+				console.log("Inside load session db");
 				if (err) { 
 					console.log("Error in getting connection ", err);
 					return reject(err);
@@ -93,6 +93,32 @@ var mongodb = {
 						} else {
 							if(result.length > 0){
 								console.log(result[0]);
+								return resolve(result[0]);
+							} else {
+								return resolve(0);
+							}
+						}
+						db.close();
+					});
+				}
+			});
+		});
+	},
+	getAccessToken: (refreshToken) => {
+		return new Promise(function(resolve, reject){
+			MongoClient.connect(process.env.MONGODB_URL + process.env.MONGODB_NAME, function(err, db) {
+				console.log("Inside load code db");
+				if (err) { 
+					console.log("Error in getting connection ", err);
+					return reject(err);
+				} else {	  
+					db.collection("fleetcor_code").find({"refresh_token": refreshToken}).toArray((error, result) => {
+						if(error){
+							console.log(error);
+							return reject(error);
+						} else {
+							if(result.length > 0){
+								//console.log(result[0]);
 								return resolve(result[0]);
 							} else {
 								return resolve(0);
