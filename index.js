@@ -95,8 +95,8 @@ alexaApp.launch(async (request, response) => {
     console.log('Session Obj ' + JSON.stringify(request.getSession()));
     let say = [];
 	if (request.getSession().details.accessToken) {
-		await api.getUserDetails(request.getSession().details.accessToken).then((userDetails) => {
-			db.loadSession(request.userId).then((sessionDetails) => {
+		await api.getUserDetails(request.getSession().details.accessToken).then(async (userDetails) => {
+			await db.loadSession(request.userId).then((sessionDetails) => {
 				say.push(`Hi ${userDetails.firstName} ${userDetails.lastName} <break strength="medium" />
 					I am Fleetcor Assistant.<break strength="medium" />I can help you with managing your Fleetcards.
 					<break strength="medium" />You may ask ‘What is my credit limit?’ or <break strength="medium" /> ‘What is my available balance?’.
