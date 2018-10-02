@@ -98,6 +98,9 @@ alexaApp.launch(async (request, response) => {
 		await api.getUserDetails(request.getSession().details.accessToken).then(async (userDetails) => {
 			if(userDetails == " "){
 				console.log("No active session");
+				response.card(alexaApp.accountLinkingCard());
+				response.say('<s>FleetCor Assistant requires you to link your FleetCor account</s>');
+				response.shouldEndSession(true);
 			} else {
 				await db.loadSession(request.userId).then((sessionDetails) => {
 					say.push(`Hi ${userDetails.firstName} ${userDetails.lastName} <break strength="medium" />
