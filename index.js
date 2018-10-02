@@ -228,7 +228,7 @@ alexaApp.intent('yesIntent',async function (request, response) {
 	if(request.getSession().details.attributes.isblockCard){
 		//After completing the operation reset the flag
 		response.session('isblockCard', false);
-		await api.getCardDetails(token, request.getSession().details.attributes.cardId).then(async (cardDetails) => {
+		await api.getCardDetails(request.getSession().details.accessToken, request.getSession().details.attributes.cardId).then(async (cardDetails) => {
 			if(cardDetails){
 				await api.blockCard(request.getSession().details.accessToken, request.getSession().details.attributes.cardId, cardDetails).then(() => {
 					response.session("cardId", 0); //Once the card is blocked reset the value
