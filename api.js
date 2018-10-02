@@ -18,6 +18,8 @@ var api = {
 				if (!error && response.statusCode === 200) {
 					var data = JSON.parse(body);
 					return resolve(data);
+				} else if(response.statusCode == 400){
+					return resolve(" ");
 				} else {
 					return reject(error);
 				}

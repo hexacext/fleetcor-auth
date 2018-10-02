@@ -223,18 +223,36 @@ alexaApp.intent('cardNumberIntent', async function (request, response) {
 
 //To handle the user input - Yes
 alexaApp.intent('yesIntent',async function (request, response) {
-	console.log("Inside yes Intent");
+	console.log("Inside yes Intent ", request.getSession().details.attributes);
     var say = [];
 	if(request.getSession().details.attributes.isblockCard){
 		//After completing the operation reset the flag
 		response.session('isblockCard', false);
-		await api.blockCard(request.getSession().details.accessToken, request.getSession().details.attributes.cardId, request.getSession().details.attributes.cardDetailsJson).then(() => {
-			response.session("cardId", 0); //Once the card is blocked reset the value
-			say = ["Your card has been blocked successfully <break strength=\"medium\" /> Is there anything I can help you with?"];
-			response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
-			response.say(say.join('\n'));
-		}).catch((error) => {
-			say = [`I am not able to complete your request at the moment.<break strength=\"medium\" /> Please try again later`];
+		await api.getCardDetails(token, request.getSession().details.attributes.cardId).then(async (cardDetails) => {
+			if(cardDetails){
+				await api.blockCard(request.getSession().details.accessToken, request.getSession().details.attributes.cardId, cardDetails).then(() => {
+					response.session("cardId", 0); //Once the card is blocked reset the value
+					say = ["Your card has been blocked successfully <break strength=\"medium\" /> Is there anything I can help you with?"];
+					response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
+					response.say(say.join('\n'));
+				}).catch((error) => {
+					say = [`I am not able to complete your request at the moment.<break strength=\"medium\" /> Please try again later`];
+					response.shouldEndSession(true);
+					response.say(say.join('\n'));
+				});
+			} else {
+				//After completing the operation reset the flag
+				response.session('isblockCard', false);
+				say = [`Please check <break strength=\"medium\" /> There is no card with ID <say-as interpret-as='digits'> ${request.getSession().details.attributes.cardId} </say-as>
+				<break strength=\"medium\" />Is there anything I can help you with?`];
+				response.session("cardId", 0);
+				console.log("cardId ", request.getSession().details.attributes.cardId);
+				response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
+				response.say(say.join('\n'));
+			}
+		}).catch((err) => {
+			console.log("Error in getting card details ", error);
+			say = [`Sorry, <break strength=\"medium\" /> I am not able to answer this at the moment.<break strength=\"medium\" /> Please try again later`];
 			response.shouldEndSession(true);
 			response.say(say.join('\n'));
 		});
