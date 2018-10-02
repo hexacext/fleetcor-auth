@@ -107,7 +107,7 @@ var mongodb = {
 	getAccessToken: (refreshToken) => {
 		return new Promise(function(resolve, reject){
 			MongoClient.connect(process.env.MONGODB_URL + process.env.MONGODB_NAME, function(err, db) {
-				console.log("Inside load code db");
+				console.log("Inside load token db");
 				if (err) { 
 					console.log("Error in getting connection ", err);
 					return reject(err);

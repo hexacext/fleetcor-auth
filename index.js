@@ -75,7 +75,7 @@ app.post('/accessToken', async (request, response) => {
 						authData.token_type = "bearer";
 						authData.expires_in = 360;
 						authData.scope = "profile";
-						//console.log("Send data ", authData);
+						console.log("New data ", authData);
 						response.send(authData);
 						db.updateCode(authData).then(() => {
 							console.log("Refresh token updated successfully");
