@@ -188,12 +188,13 @@ alexaApp.intent('blockCardIntent', async function (request, response) {
 	//Check if the card id is given in utterance/ user input
 	if(request.data.request.intent.slots.lastFour.value){
 		//cardId = request.data.request.intent.slots.lastFour.value;
-		db.updateSession(request.userId, request.data.request.intent.slots.lastFour.value)
+		response.session('cardId', request.data.request.intent.slots.lastFour.value);
+		/*db.updateSession(request.userId, request.data.request.intent.slots.lastFour.value)
 		.then(() => {
 			console.log("Card Id ", request.data.request.intent.slots.lastFour.value, "saved successfully");
 		}).catch((error) => {
 			console.log("Error in saving card details");
-		});
+		});*/
 		await handleQuery(request, request.getSession().details.accessToken, say, response);
 	} else {
 		//Check if card id is already stored in session
@@ -248,8 +249,6 @@ alexaApp.intent('yesIntent',async function (request, response) {
 					response.say(say.join('\n'));
 				});
 			} else {
-				//After completing the operation reset the flag
-				response.session('isblockCard', false);
 				say = [`Please check <break strength=\"medium\" /> There is no card with ID <say-as interpret-as='digits'> ${request.getSession().details.attributes.cardId} </say-as>
 				<break strength=\"medium\" />Is there anything I can help you with?`];
 				response.session("cardId", 0);
@@ -257,6 +256,8 @@ alexaApp.intent('yesIntent',async function (request, response) {
 				response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
 				response.say(say.join('\n'));
 			}
+			//After completing the operation reset the flag
+			response.session('isblockCard', false);
 		}).catch((err) => {
 			console.log("Error in getting card details ", error);
 			say = [`Sorry, <break strength=\"medium\" /> I am not able to answer this at the moment.<break strength=\"medium\" /> Please try again later`];
