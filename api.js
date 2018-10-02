@@ -21,6 +21,7 @@ var api = {
 				} else if(response.statusCode == 400){
 					return resolve(" ");
 				} else {
+					console.log("SC ",response.statusCode);
 					return reject(error);
 				}
 			});
@@ -92,7 +93,7 @@ var api = {
 	},
 	//To block the user card using the card id
 	blockCard: (token, cardId, cardJson) => {
-		console.log(token, cardId, cardJson);
+		//console.log(token, cardId, cardJson);
 		let options = {
 			url: config.apiDomain + config.blockCardURL.replace('CARD_ID',cardId),
 			method: 'PUT',

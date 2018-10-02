@@ -96,30 +96,34 @@ alexaApp.launch(async (request, response) => {
     let say = [];
 	if (request.getSession().details.accessToken) {
 		await api.getUserDetails(request.getSession().details.accessToken).then(async (userDetails) => {
-			await db.loadSession(request.userId).then((sessionDetails) => {
-				say.push(`Hi ${userDetails.firstName} ${userDetails.lastName} <break strength="medium" />
-					I am Fleetcor Assistant.<break strength="medium" />I can help you with managing your Fleetcards.
-					<break strength="medium" />You may ask ‘What is my credit limit?’ or <break strength="medium" /> ‘What is my available balance?’.
-					<break strength="medium" />You can stop the conversation anytime by saying end <break strength="medium" /> or stop
-					<break strength="medium" />What can I do for you today`); 
-				response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");			
-				response.say(say.join('\n'));
-				//By default set the following query flags to false
-				response.session('isblockCard', false);
-				response.session('isRecentTransactions', false);
-				response.session('isExistingCard', false);
-				response.session('cardId', 0);
-				response.session('cardDetailsJson', {});					
-				response.session('cardId', sessionDetails.cardId);
-				if(sessionDetails == 0){
-					console.log("No session value loading card id to zero");
-				} else {
-					console.log("Last accessed card ", sessionDetails.cardId);
-				}
-				response.send();
-			}).catch((errors) => {
-				console.log("Error in getting session details ", errors);
-			});			
+			if(userDetails == " "){
+				console.log("No active session");
+			} else {
+				await db.loadSession(request.userId).then((sessionDetails) => {
+					say.push(`Hi ${userDetails.firstName} ${userDetails.lastName} <break strength="medium" />
+						I am Fleetcor Assistant.<break strength="medium" />I can help you with managing your Fleetcards.
+						<break strength="medium" />You may ask ‘What is my credit limit?’ or <break strength="medium" /> ‘What is my available balance?’.
+						<break strength="medium" />You can stop the conversation anytime by saying end <break strength="medium" /> or stop
+						<break strength="medium" />What can I do for you today`); 
+					response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");			
+					response.say(say.join('\n'));
+					//By default set the following query flags to false
+					response.session('isblockCard', false);
+					response.session('isRecentTransactions', false);
+					response.session('isExistingCard', false);
+					response.session('cardId', 0);
+					response.session('cardDetailsJson', {});					
+					response.session('cardId', sessionDetails.cardId);
+					if(sessionDetails == 0){
+						console.log("No session value loading card id to zero");
+					} else {
+						console.log("Last accessed card ", sessionDetails.cardId);
+					}
+					response.send();
+				}).catch((errors) => {
+					console.log("Error in getting session details ", errors);
+				});		
+			}				
 		}).catch((error) => {
 			console.log("Error in acc link ", error);
 			response.say('<s>There was a problem with account linking.<break strength="medium" /> Please try again later</s>');
