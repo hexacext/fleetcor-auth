@@ -51,7 +51,7 @@ app.post('/generateToken', async (request, response) => {
 
 //To send the access token using the code generated
 app.post('/accessToken', async (request, response) => {
-	console.log("Inside the access token ", request.body.code);
+	console.log("Inside the access token ", request.body);
 	await db.loadCode(request.body.code).then((authData) => {
 		console.log("Inside auth code ", request.headers);
 		if(authData == 0){
@@ -61,7 +61,7 @@ app.post('/accessToken', async (request, response) => {
 			authData.token_type = "bearer";
 			authData.expires_in = 3600;
 			authData.scope = "profile";
-			console.log("Send data ", authData);
+			//console.log("Send data ", authData);
 			response.send(authData);
 		}
 	}).catch((err) => {
