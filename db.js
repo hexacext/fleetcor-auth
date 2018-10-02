@@ -42,7 +42,7 @@ var mongodb = {
 							return reject(error);
 						} else {
 							if(result.length > 0){
-								console.log(result[0]);
+								//console.log(result[0]);
 								return resolve(result[0]);
 							} else {
 								return resolve(0);
