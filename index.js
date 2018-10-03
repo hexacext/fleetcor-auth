@@ -62,7 +62,7 @@ app.post('/accessToken', async (request, response) => {
 		  "access_token" : token.authorization.replace('Bearer ',''),
 		  "token_type" : "bearer",
 		  "expires_in" : 3600,
-		  "refresh_token" : token.refresh-token,
+		  "refresh_token" : token["refresh-token"],
 		  "scope" : "profile"
 		};
 		console.log("Completed ", details);
