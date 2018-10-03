@@ -69,6 +69,7 @@ app.post('/accessToken', async (request, response) => {
 		response.send(details);
 	}).catch((error) => {
 		console.log("Error in accessToken ", error);
+		response.end();
 	});
 	/*if(request.body.grant_type == "refresh_token"){
 		console.log("Inside refresh token");
