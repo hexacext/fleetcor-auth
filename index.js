@@ -42,10 +42,12 @@ app.post('/generateToken', async (request, response) => {
 				response.redirect(`${urlParts.query.redirect_uri}?response_type=code&state=${urlParts.query.state}&code=${authData.code}`);
 			}).catch((err) => {
 				console.log("Unable to save code",err);
+				response.redirect(`${urlParts.query.redirect_uri}`);
 			});
 		}
 	}).catch((error) => {
 		console.log("Error in accessToken ", error);
+		response.redirect(`${urlParts.query.redirect_uri}`);
 	});
 });
 
@@ -89,6 +91,7 @@ app.post('/accessToken', async (request, response) => {
 			}
 		}).catch((err) => {
 			console.log("Error in loading code ", err);
+			response.end();
 		});
 	}
 });

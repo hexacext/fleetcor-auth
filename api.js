@@ -19,7 +19,7 @@ var api = {
 				if (!error && response.statusCode === 200) {
 					var data = JSON.parse(body);
 					return resolve(data);
-				} else if(response.statusCode == 401){
+				} else if(response && response.statusCode == 401){
 					return resolve(" ");
 				} else {
 					console.log("SC ",response.statusCode);
@@ -43,7 +43,7 @@ var api = {
 			requestModule(options, (error, response, body) => {
 				if (!error && response.statusCode == 200) {
 					return resolve(response.headers);
-				} else if(response.statusCode == 400){
+				} else if(response && response.statusCode == 400){
 					return resolve(" ");
 				} else {
 					console.log("error ", error);
@@ -67,7 +67,7 @@ var api = {
 			requestModule(options, (error, response, body) => {
 				if (!error && response.statusCode == 200) {
 					return resolve(response.headers);
-				} else if(response.statusCode == 400){
+				} else if(response && response.statusCode == 400){
 					return resolve(" ");
 				} else {
 					console.log("error ", error);
