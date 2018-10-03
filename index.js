@@ -285,7 +285,7 @@ alexaApp.intent('yesIntent',async function (request, response) {
 				response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
 				response.say(say.join('\n'));
 			} else {
-				say = [`You have the following transactions for the card ending with <say-as interpret-as='digits'> ${lastFour} </say-as>`];
+				say = [`You have the following transactions for the card ending with <say-as interpret-as='digits'> ${request.getSession().details.attributes.cardId} </say-as>`];
 				let totalLength = transactionDetails.cardTransactions.length > 5 ? 5 : transactionDetails.cardTransactions.length;
 				for(var i=0;i<totalLength;i++){
 					console.log(transactionDetails.cardTransactions[i].transactionDate,transactionDetails.cardTransactions[i].amount,
@@ -462,7 +462,7 @@ async function handleQuery(request, token, say, response){
 						response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
 						response.say(say.join('\n'));
 					} else {
-						say = [`You have the following transactions for the card ending with <say-as interpret-as='digits'> ${lastFour} </say-as>`];
+						say = [`You have the following transactions for the card ending with <say-as interpret-as='digits'> ${request.getSession().details.attributes.cardId} </say-as>`];
 						let totalLength = transactionDetails.cardTransactions.length > 5 ? 5 : transactionDetails.cardTransactions.length;
 						for(var i=0;i<totalLength;i++){
 							console.log(transactionDetails.cardTransactions[i].transactionDate,transactionDetails.cardTransactions[i].amount,
@@ -485,9 +485,9 @@ async function handleQuery(request, token, say, response){
 			} else {
 				//After completing the operation reset the flag
 				response.session("isRecentTransactions", false);
-				say = [`Please check <break strength=\"medium\" /> There is no card ending with <say-as interpret-as='digits'> ${lastFour} </say-as>
+				say = [`Please check <break strength=\"medium\" /> There is no card ending with <say-as interpret-as='digits'> ${request.getSession().details.attributes.cardId} </say-as>
 				<break strength=\"medium\" />Is there anything I can help you with?`];
-				lastFour = "";
+				response.session("cardId",0);
 				response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
 				response.say(say.join('\n'));
 			}
