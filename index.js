@@ -67,6 +67,7 @@ app.post('/accessToken', async (request, response) => {
 					if(newTokenDetails == " "){
 						console.log("Unable to renew session using Refresh token");
 					} else {
+						console.log("New Token ", newTokenDetails);
 						let authData = {
 							code: tokenDetails.code,
 							accessToken: newTokenDetails.authorization.replace('Bearer ',''),
