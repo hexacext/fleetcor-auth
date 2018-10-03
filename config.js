@@ -1,5 +1,5 @@
 config ={
-	"apiDomain"  		  : "http://simplyui-unmc-api-qa.azurewebsites.net/",
+	"apiDomain"  		  : "http://simplyui-unmc-web-qa.azurewebsites.net",
 	"accessTokenURL"	  : "api/sessions",
 	"creditAndBalanceURL" : "api/businesses/me",
 	"userProfileURL"	  : "api/users/me",

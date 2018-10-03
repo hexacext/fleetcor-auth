@@ -144,22 +144,23 @@ var api = {
 	//To get the recent transactions for the user using card id
 	recentTransaction: (token, cardId) => {
 		console.log("Inside the recent Transaction API");
+		//For testing use date b/w 2016-01-01 to current date
+		//Convert date to milliseconds
+		let startDate = new Date('2016-01-01').getTime();
+		let endDate = new Date().getTime();
 		let options = {
-			url: config.apiDomain + config.recentTransactionURL.replace('END_DATE','').replace('START_DATE',''),
+			url: config.apiDomain + config.recentTransactionURL.replace('END_DATE',endDate).replace('START_DATE',startDate),
 			method: 'GET',
 			headers: {
 				authorization: 'Bearer ' + token, //Bearer Token
 			}
-		};
-		
+		};		
 		return new Promise((resolve, reject) => {
 			requestModule(options, (error, response, body) => {
-				if (!error && response.statusCode == 200) {
-					return resolve(response.headers);
-				} else if(response.statusCode == 400){
-					return resolve(" ");
+				if (!error && response.statusCode === 200) {
+					var data = JSON.parse(body);
+					return resolve(data);
 				} else {
-					console.log("error ", error);
 					return reject(error);
 				}
 			});
