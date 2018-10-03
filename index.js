@@ -42,12 +42,12 @@ app.post('/generateToken', async (request, response) => {
 				response.redirect(`${urlParts.query.redirect_uri}?response_type=code&state=${urlParts.query.state}&code=${authData.code}`);
 			}).catch((err) => {
 				console.log("Unable to save code",err);
-				response.redirect(`${urlParts.query.redirect_uri}`);
+				response.end();
 			});
 		}
 	}).catch((error) => {
 		console.log("Error in accessToken ", error);
-		response.redirect(`${urlParts.query.redirect_uri}`);
+		response.end();
 	});
 });
 
