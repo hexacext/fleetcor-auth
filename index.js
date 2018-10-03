@@ -60,20 +60,13 @@ app.post('/accessToken', async (request, response) => {
 				response.end();
 			} else {
 				console.log("New Token ", newTokenDetails);
-				//code: tokenDetails.code,
 				let authData = {					
 					accessToken: newTokenDetails.authorization.replace('Bearer ',''),
 					refreshToken: newTokenDetails["refresh-token"]
 				};
 				authData.token_type = "bearer";
-				authData.expires_in = 360;
+				authData.expires_in = 3600;
 				authData.scope = "profile offline";						
-				/*db.updateCode(authData).then(() => {
-					console.log("Refresh token updated successfully");
-				}).catch((err) => {
-					console.log("Unable to save code",err);
-				});*/
-				//delete authData.code;
 				console.log("New data ", authData);
 				response.send(authData);
 			}
@@ -90,7 +83,7 @@ app.post('/accessToken', async (request, response) => {
 				response.send(authData);
 			} else {
 				authData.token_type = "bearer";
-				authData.expires_in = 360;
+				authData.expires_in = 3600;
 				authData.scope = "profile offline";
 				console.log("Send data ", authData);
 				response.send(authData);
