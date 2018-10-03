@@ -73,26 +73,7 @@ app.post('/accessToken', async (request, response) => {
 	});*/
 	if(request.body.grant_type == "refresh_token"){
 		console.log("Inside refresh token");
-		request.body = {
-			username: 'AK037',
-			password: 'Password@1'
-		};
-		await api.getAccessToken(request.body).then((token) => {
-			console.log("Token ", token);
-			let details = {
-			  "access_token" : token.authorization.replace('Bearer ',''),
-			  "token_type" : "bearer",
-			  "expires_in" : 360,
-			  "refresh_token" : token["refresh-token"],
-			  "scope" : "profile"
-			};
-			console.log("Completed ", details);
-			response.send(details);
-		}).catch((error) => {
-			console.log("Error in accessToken ", error);
-			response.end();
-		});
-		/*await api.renewSession(request.body.refresh_token).then((newTokenDetails) => {
+		await api.renewSession(request.body.refresh_token).then((newTokenDetails) => {
 			console.log("After token");
 			if(newTokenDetails == " "){
 				console.log("Unable to renew session using Refresh token");
@@ -101,8 +82,8 @@ app.post('/accessToken', async (request, response) => {
 			} else {
 				console.log("New Token ", newTokenDetails);
 				let authData = {					
-					accessToken: newTokenDetails.authorization.replace('Bearer ',''),
-					refreshToken: newTokenDetails["refresh-token"]
+					access_token: newTokenDetails.authorization.replace('Bearer ',''),
+					refresh_token: newTokenDetails["refresh-token"]
 				};
 				authData.token_type = "bearer";
 				authData.expires_in = 360;
@@ -114,7 +95,7 @@ app.post('/accessToken', async (request, response) => {
 		}).catch((err) => {
 			console.log("Error in new session ", error);
 			response.end();
-		});*/
+		});
 	} else {
 		console.log("Inside access token generate");
 		await db.loadCode(request.body.code).then((authData) => {
