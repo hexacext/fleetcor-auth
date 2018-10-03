@@ -65,7 +65,7 @@ app.post('/accessToken', async (request, response) => {
 					refreshToken: newTokenDetails["refresh-token"]
 				};
 				authData.token_type = "bearer";
-				authData.expires_in = 3600;
+				authData.expires_in = 360;
 				authData.scope = "profile offline";						
 				console.log("New data ", authData);
 				response.send(authData);
