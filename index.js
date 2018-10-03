@@ -56,7 +56,7 @@ app.post('/accessToken', async (request, response) => {
 		username: 'AK037',
 		password: 'Password@1'
 	};
-	await getAccessToken(request.body).then((token) => {
+	await api.getAccessToken(request.body).then((token) => {
 		console.log("Token ", token);
 		let details = {
 		  "access_token" : token.authorization.replace('Bearer ',''),
