@@ -51,26 +51,7 @@ app.post('/generateToken', async (request, response) => {
 
 //To send the access token using the code generated
 app.post('/accessToken', async (request, response) => {
-	console.log("Inside the access token ", request.body);
-	/*request.body = {
-		username: 'AK037',
-		password: 'Password@1'
-	};
-	await api.getAccessToken(request.body).then((token) => {
-		console.log("Token ", token);
-		let details = {
-		  "access_token" : token.authorization.replace('Bearer ',''),
-		  "token_type" : "bearer",
-		  "expires_in" : 360,
-		  "refresh_token" : token["refresh-token"],
-		  "scope" : "profile"
-		};
-		console.log("Completed ", details);
-		response.send(details);
-	}).catch((error) => {
-		console.log("Error in accessToken ", error);
-		response.end();
-	});*/
+	console.log("Inside the access token ");
 	if(request.body.grant_type == "refresh_token"){
 		console.log("Inside refresh token");
 		await api.renewSession(request.body.refresh_token).then((newTokenDetails) => {
@@ -87,11 +68,9 @@ app.post('/accessToken', async (request, response) => {
 				};
 				authData.token_type = "bearer";
 				authData.expires_in = 360;
-				authData.scope = "profile offline";						
-				console.log("New data ", authData);
+				authData.scope = "profile offline";
 				response.send(authData);
 			}
-			console.log("Reached end");
 		}).catch((err) => {
 			console.log("Error in new session ", error);
 			response.end();
@@ -99,7 +78,6 @@ app.post('/accessToken', async (request, response) => {
 	} else {
 		console.log("Inside access token generate");
 		await db.loadCode(request.body.code).then((authData) => {
-			//console.log("Inside auth code ", request.headers);
 			if(authData == 0){
 				//Change the code to refresh the token
 				response.send(authData);
@@ -107,7 +85,6 @@ app.post('/accessToken', async (request, response) => {
 				authData.token_type = "bearer";
 				authData.expires_in = 360;
 				authData.scope = "profile offline";
-				console.log("Send data ", authData);
 				response.send(authData);
 			}
 		}).catch((err) => {
@@ -234,14 +211,7 @@ alexaApp.intent('blockCardIntent', async function (request, response) {
     let say = [];
 	//Check if the card id is given in utterance/ user input
 	if(request.data.request.intent.slots.lastFour.value){
-		//cardId = request.data.request.intent.slots.lastFour.value;
 		response.session('cardId', request.data.request.intent.slots.lastFour.value);
-		/*db.updateSession(request.userId, request.data.request.intent.slots.lastFour.value)
-		.then(() => {
-			console.log("Card Id ", request.data.request.intent.slots.lastFour.value, "saved successfully");
-		}).catch((error) => {
-			console.log("Error in saving card details");
-		});*/
 		await handleQuery(request, request.getSession().details.accessToken, say, response);
 	} else {
 		//Check if card id is already stored in session
@@ -267,12 +237,12 @@ alexaApp.intent('cardNumberIntent', async function (request, response) {
     var say = [];
     console.log(request.data.request.intent.slots.cardNumber.value)
     //cardId = request.data.request.intent.slots.cardNumber.value;
-	db.updateSession(request.userId, request.data.request.intent.slots.cardNumber.value)
+	/*db.updateSession(request.userId, request.data.request.intent.slots.cardNumber.value)
 	.then(() => {
 		console.log("Card Id ",request.userId, request.data.request.intent.slots.cardNumber.value, "saved successfully");
 	}).catch((error) => {
 		console.log("Error in saving card details");
-	});
+	});*/
 	await handleQuery(request, request.getSession().details.accessToken, say, response);
 });
 
@@ -435,6 +405,11 @@ async function handleQuery(request, token, say, response){
 				Are you sure <break strength=\"medium\" /> you want to block the card with ID <say-as interpret-as='digits'> ${request.getSession().details.attributes.cardId} </say-as>`];
 				response.shouldEndSession(false, "Say Yes to block <break strength=\"medium\" /> or No to not block the card");
 				response.say(say.join('\n'));
+				db.updateSession(request.userId, request.data.request.intent.slots.lastFour.value).then(() => {
+					console.log("Card Id ", request.data.request.intent.slots.lastFour.value, "saved successfully");
+				}).catch((error) => {
+					console.log("Error in saving card details");
+				});
 			} else {
 				//After completing the operation reset the flag
 				response.session('isblockCard', false);

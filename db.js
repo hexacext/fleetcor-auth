@@ -42,7 +42,6 @@ var mongodb = {
 							return reject(error);
 						} else {
 							if(result.length > 0){
-								//console.log(result[0]);
 								return resolve(result[0]);
 							} else {
 								return resolve(0);
@@ -92,33 +91,6 @@ var mongodb = {
 							return reject(error);
 						} else {
 							if(result.length > 0){
-								console.log(result[0]);
-								return resolve(result[0]);
-							} else {
-								return resolve(0);
-							}
-						}
-						db.close();
-					});
-				}
-			});
-		});
-	},
-	getAccessToken: (refreshToken) => {
-		return new Promise(function(resolve, reject){
-			MongoClient.connect(process.env.MONGODB_URL + process.env.MONGODB_NAME, function(err, db) {
-				console.log("Inside load token db");
-				if (err) { 
-					console.log("Error in getting connection ", err);
-					return reject(err);
-				} else {	  
-					db.collection("fleetcor_code").find({"refresh_token": refreshToken}).toArray((error, result) => {
-						if(error){
-							console.log(error);
-							return reject(error);
-						} else {
-							if(result.length > 0){
-								//console.log(result[0]);
 								return resolve(result[0]);
 							} else {
 								return resolve(0);

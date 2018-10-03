@@ -54,7 +54,7 @@ var api = {
 	},
 	//To renew the session using the access token and refresh token
 	renewSession: (refreshToken) => {
-		console.log("Inside the renew Session API", refreshToken,config.apiDomain + config.renewSessionURL);
+		console.log("Inside the renew Session API");
 		let options = {
 			url: config.apiDomain + config.renewSessionURL,
 			method: 'POST',
@@ -134,6 +134,30 @@ var api = {
 			requestModule(options, (error, response, body) => {
 				if (!error && response.statusCode == 200) {
 					return resolve();
+				} else {
+					console.log("error ", error);
+					return reject(error);
+				}
+			});
+		});
+	},
+	//To get the recent transactions for the user using card id
+	recentTransaction: (token, cardId) => {
+		console.log("Inside the recent Transaction API");
+		let options = {
+			url: config.apiDomain + config.recentTransactionURL.replace('END_DATE','').replace('START_DATE',''),
+			method: 'GET',
+			headers: {
+				authorization: 'Bearer ' + token, //Bearer Token
+			}
+		};
+		
+		return new Promise((resolve, reject) => {
+			requestModule(options, (error, response, body) => {
+				if (!error && response.statusCode == 200) {
+					return resolve(response.headers);
+				} else if(response.statusCode == 400){
+					return resolve(" ");
 				} else {
 					console.log("error ", error);
 					return reject(error);
