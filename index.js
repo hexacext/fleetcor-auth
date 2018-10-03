@@ -238,6 +238,7 @@ alexaApp.intent('cardNumberIntent', async function (request, response) {
 	console.log("Inside CN Intent");
     var say = [];
     console.log(request.data.request.intent.slots.cardNumber.value);
+	response.session("cardId",request.data.request.intent.slots.cardNumber.value);
 	await handleQuery(request, request.getSession().details.accessToken, say, response);
 });
 
@@ -362,8 +363,8 @@ alexaApp.intent('transactionsIntent', async function(request, response){
 			response.say(say.join('\n'));
 		} else {
 			response.session('isExistingCard', false);
-			say = ["Sure,<break strength=\"medium\" /> Please provide the last 4 digits of the card you wish to know"];
-			response.shouldEndSession(false, "Tell me the last 4 digits of your card to check the transactions");
+			say = ["Sure,<break strength=\"medium\" /> Please provide the ID of the card you wish to know"];
+			response.shouldEndSession(false, "Tell me the ID of your card to check the transactions");
 			response.say(say.join('\n'));			
 		}
 	}
