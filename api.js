@@ -54,7 +54,7 @@ var api = {
 	},
 	//To renew the session using the access token and refresh token
 	renewSession: (refreshToken) => {
-		console.log("Inside the renew Session API");
+		console.log("Inside the renew Session API", refreshToken,config.apiDomain + config.renewSessionURL);
 		let options = {
 			url: config.apiDomain + config.renewSessionURL,
 			method: 'POST',
@@ -62,6 +62,7 @@ var api = {
 				"refreshToken": refreshToken
 			}
 		};
+		
 		return new Promise((resolve, reject) => {
 			requestModule(options, (error, response, body) => {
 				if (!error && response.statusCode == 200) {

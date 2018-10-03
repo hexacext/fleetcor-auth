@@ -54,17 +54,14 @@ app.post('/accessToken', async (request, response) => {
 	console.log("Inside the access token ", request.body);
 	if(request.body.grant_type == "refresh_token"){
 		console.log("Inside refresh token");
-		/*let data = {
-			refreshToken: request.body.refresh_token
-		};
-		console.log("Data ", data);*/
 		await api.renewSession(request.body.refresh_token).then((newTokenDetails) => {
 			if(newTokenDetails == " "){
 				console.log("Unable to renew session using Refresh token");
+				response.end();
 			} else {
 				console.log("New Token ", newTokenDetails);
-				let authData = {
-					//code: tokenDetails.code,
+				//code: tokenDetails.code,
+				let authData = {					
 					accessToken: newTokenDetails.authorization.replace('Bearer ',''),
 					refreshToken: newTokenDetails["refresh-token"]
 				};
@@ -82,6 +79,7 @@ app.post('/accessToken', async (request, response) => {
 			}
 		}).catch((err) => {
 			console.log("Error in new session ", error);
+			response.end();
 		});
 	} else {
 		console.log("Inside access token generate");
