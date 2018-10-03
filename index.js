@@ -105,7 +105,7 @@ app.post('/accessToken', async (request, response) => {
 				response.send(authData);
 			} else {
 				authData.token_type = "bearer";
-				authData.expires_in = 3600;
+				authData.expires_in = 360;
 				authData.scope = "profile offline";
 				console.log("Send data ", authData);
 				response.send(authData);
