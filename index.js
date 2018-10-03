@@ -354,10 +354,10 @@ alexaApp.intent('transactionsIntent', async function(request, response){
 		response.session('cardId', request.data.request.intent.slots.transactionNumber.value);
 		await handleQuery(request, say, response);
 	} else {
-		if(cardId.trim() != ""){
+		if(request.getSession().details.attributes.cardId != ""){
 			response.session('isExistingCard', true);
-			say = [`Sure,<break strength=\"medium\" /> Do you want to check the transactions for card ending with <say-as interpret-as='digits'> ${cardId} </say-as>`];
-			response.shouldEndSession(false, `Tell me Yes <break strength=\"medium\" /> to check the transactions <say-as interpret-as='digits'> ${cardId} </say-as>
+			say = [`Sure,<break strength=\"medium\" /> Do you want to check the transactions for card ending with <say-as interpret-as='digits'> ${request.getSession().details.attributes.cardId} </say-as>`];
+			response.shouldEndSession(false, `Tell me Yes <break strength=\"medium\" /> to check the transactions <say-as interpret-as='digits'> ${request.getSession().details.attributes.cardId} </say-as>
 			<break strength=\"medium\" />or No <break strength=\"medium\" /> to check for other card`);
 			response.say(say.join('\n'));
 		} else {
