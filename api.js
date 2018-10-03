@@ -53,16 +53,13 @@ var api = {
 		});
 	},
 	//To renew the session using the access token and refresh token
-	renewSession: (data) => {
+	renewSession: (refreshToken) => {
 		console.log("Inside the renew Session API");
 		let options = {
 			url: config.apiDomain + config.renewSessionURL,
 			method: 'POST',
-			headers: {
-				authorization: 'Bearer ' + data.token, //Bearer Token
-			},
 			json: {
-				refreshToken: data.refreshToken
+				"refreshToken": refreshToken
 			}
 		};
 		return new Promise((resolve, reject) => {

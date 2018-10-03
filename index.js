@@ -54,43 +54,34 @@ app.post('/accessToken', async (request, response) => {
 	console.log("Inside the access token ", request.body);
 	if(request.body.grant_type == "refresh_token"){
 		console.log("Inside refresh token");
-		await db.getAccessToken(request.body.refresh_token).then(async (tokenDetails) => {
-			if(tokenDetails == 0){
-				console.log("No access token details found");
+		/*let data = {
+			refreshToken: request.body.refresh_token
+		};
+		console.log("Data ", data);*/
+		await api.renewSession(request.body.refresh_token).then((newTokenDetails) => {
+			if(newTokenDetails == " "){
+				console.log("Unable to renew session using Refresh token");
 			} else {
-				let data = {
-					refreshToken: request.body.refresh_token,
-					token: tokenDetails.access_token
+				console.log("New Token ", newTokenDetails);
+				let authData = {
+					//code: tokenDetails.code,
+					accessToken: newTokenDetails.authorization.replace('Bearer ',''),
+					refreshToken: newTokenDetails["refresh-token"]
 				};
-				console.log("Data ", data);
-				await api.renewSession(data).then((newTokenDetails) => {
-					if(newTokenDetails == " "){
-						console.log("Unable to renew session using Refresh token");
-					} else {
-						console.log("New Token ", newTokenDetails);
-						let authData = {
-							//code: tokenDetails.code,
-							accessToken: newTokenDetails.authorization.replace('Bearer ',''),
-							refreshToken: newTokenDetails["refresh-token"]
-						};
-						authData.token_type = "bearer";
-						authData.expires_in = 360;
-						authData.scope = "profile offline";						
-						/*db.updateCode(authData).then(() => {
-							console.log("Refresh token updated successfully");
-						}).catch((err) => {
-							console.log("Unable to save code",err);
-						});*/
-						//delete authData.code;
-						console.log("New data ", authData);
-						response.send(authData);
-					}
+				authData.token_type = "bearer";
+				authData.expires_in = 360;
+				authData.scope = "profile offline";						
+				/*db.updateCode(authData).then(() => {
+					console.log("Refresh token updated successfully");
 				}).catch((err) => {
-					console.log("Error in new session ", error);
-				});
+					console.log("Unable to save code",err);
+				});*/
+				//delete authData.code;
+				console.log("New data ", authData);
+				response.send(authData);
 			}
-		}).catch((error) => {
-			console.log("Error in getting access token from DB ", error);
+		}).catch((err) => {
+			console.log("Error in new session ", error);
 		});
 	} else {
 		console.log("Inside access token generate");
