@@ -100,7 +100,7 @@ var api = {
 	},
 	//To get the card details available for the user
 	getCardDetails: (token, cardId) => {
-		console.log("Inside get card details API");
+		console.log("Inside get card details API", cardId);
 		let options = {
 			method: 'GET',
 			url: config.apiDomain + config.cardDetailsURL.replace('CARD_ID',cardId),
