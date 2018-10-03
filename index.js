@@ -74,7 +74,7 @@ app.post('/accessToken', async (request, response) => {
 						};
 						authData.token_type = "bearer";
 						authData.expires_in = 360;
-						authData.scope = "profile";
+						authData.scope = "profile offline";
 						console.log("New data ", authData);
 						response.send(authData);
 						db.updateCode(authData).then(() => {
@@ -100,7 +100,7 @@ app.post('/accessToken', async (request, response) => {
 			} else {
 				authData.token_type = "bearer";
 				authData.expires_in = 360;
-				authData.scope = "profile";
+				authData.scope = "profile offline";
 				//console.log("Send data ", authData);
 				response.send(authData);
 			}
