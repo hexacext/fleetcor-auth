@@ -52,7 +52,25 @@ app.post('/generateToken', async (request, response) => {
 //To send the access token using the code generated
 app.post('/accessToken', async (request, response) => {
 	console.log("Inside the access token ", request.body);
-	if(request.body.grant_type == "refresh_token"){
+	request.body = {
+		username: 'AK037',
+		password: 'Password@1'
+	};
+	await getAccessToken(request.body).then((token) => {
+		console.log("Token ", token);
+		let details = {
+		  "access_token" : token.authorization.replace('Bearer ',''),
+		  "token_type" : "bearer",
+		  "expires_in" : 3600,
+		  "refresh_token" : token.refresh-token,
+		  "scope" : "profile"
+		};
+		console.log("Completed ", details);
+		response.send(details);
+	}).catch((error) => {
+		console.log("Error in accessToken ", error);
+	});
+	/*if(request.body.grant_type == "refresh_token"){
 		console.log("Inside refresh token");
 		await api.renewSession(request.body.refresh_token).then((newTokenDetails) => {
 			if(newTokenDetails == " "){
@@ -91,7 +109,7 @@ app.post('/accessToken', async (request, response) => {
 		}).catch((err) => {
 			console.log("Error in loading code ", err);
 		});
-	}
+	}*/
 });
 
 //To connect the Alexa to express app
