@@ -114,6 +114,7 @@ var api = {
 					var data = JSON.parse(body);
 					return resolve(data);
 				} else {
+					console.log("Err in card ", response.statusCode);
 					return reject(error);
 				}
 			});
