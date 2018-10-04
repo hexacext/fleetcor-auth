@@ -321,10 +321,13 @@ alexaApp.intent('transactionsIntent', async function(request, response){
 			say = [`You last 5 transactions are`];
 			let totalLength = transactionDetails.cardTransactions.length > 5 ? 5 : transactionDetails.cardTransactions.length;
 			for(var i=0;i<totalLength;i++){
-				console.log(moment(transactionDetails.cardTransactions[i].transactionDate).format('MM/DD/YYYY'),
+				//console.log(moment(transactionDetails.cardTransactions[i].transactionDate).format('MM/DD/YYYY'),
 				//moment(transactionDetails.cardTransactions[i].transactionDate).format('h mm A'),
-				transactionDetails.cardTransactions[i].amount,
-				transactionDetails.cardTransactions[i].payee.name);
+				//transactionDetails.cardTransactions[i].amount,
+				//transactionDetails.cardTransactions[i].payee.name);
+				say.push(`<break strength="x-strong" /> On <say-as interpret-as="date" format="mdy"> ${transactionDetails.cardTransactions[i].transactionDate} </say-as> 
+				${moment(transactionDetails.cardTransactions[i].transactionDate).format('h mm A')} <break strength="medium" />
+				you have spent $ ${transactionDetails.cardTransactions[i].amount} <break strength="medium" /> at ${transactionDetails.cardTransactions[i].payee.name}`);
 			}
 			say.push(`<break time="1s" /> If you find any dispute in transaction <break strength=\"medium\" />
 			Please contact us <say-as interpret-as="telephone">800-771-6075</say-as>
