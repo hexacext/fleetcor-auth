@@ -155,7 +155,8 @@ var api = {
 			headers: {
 				authorization: 'Bearer ' + token, //Bearer Token
 			}
-		};		
+		};	
+		console.log("URL ", options.url);	
 		return new Promise((resolve, reject) => {
 			requestModule(options, (error, response, body) => {
 				if (!error && response.statusCode === 200) {
