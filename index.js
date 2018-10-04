@@ -322,7 +322,7 @@ alexaApp.intent('transactionsIntent', async function(request, response){
 			let totalLength = transactionDetails.cardTransactions.length > 5 ? 5 : transactionDetails.cardTransactions.length;
 			for(var i=0;i<totalLength;i++){
 				console.log(moment(transactionDetails.cardTransactions[i].transactionDate).format('MM/DD/YYYY'),
-				moment(transactionDetails.cardTransactions[i].transactionDate).format('h mm A'),
+				moment(transactionDetails.cardTransactions[i].transactionDate).format('h mm A')
 				,transactionDetails.cardTransactions[i].amount,
 				transactionDetails.cardTransactions[i].payee.name);
 			}
