@@ -139,7 +139,6 @@ alexaApp.launch(async (request, response) => {
 					response.say(say.join('\n'));
 					//By default set the following query flags to false
 					response.session('isblockCard', false);
-					response.session('isRecentTransactions', false);
 					response.session('isExistingCard', false);
 					response.session('cardId', 0);
 					response.session('cardId', sessionDetails.cardId);
@@ -277,35 +276,6 @@ alexaApp.intent('yesIntent',async function (request, response) {
 			response.shouldEndSession(true);
 			response.say(say.join('\n'));
 		});
-	} else if(request.getSession().details.attributes.isRecentTransactions){
-		await api.recentTransaction(request.getSession().details.accessToken, request.getSession().details.attributes.cardId).then((transactionDetails) => {
-			console.log("Tran data ", transactionDetails.cardTransactions.length);
-			if(transactionDetails.cardTransactions.length == 0){
-				say = [`You don't have any recent transactions in your card <break strength=\"medium\" /> You can use your fleetcard in any of the specified Merchant Location
-				<break strength=\"medium\" /> Is there anything I can help you with?`];
-				response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
-				response.say(say.join('\n'));
-			} else {
-				say = [`You have the following transactions for the card ending with <say-as interpret-as='digits'> ${request.getSession().details.attributes.cardId} </say-as>`];
-				let totalLength = transactionDetails.cardTransactions.length > 5 ? 5 : transactionDetails.cardTransactions.length;
-				for(var i=0;i<totalLength;i++){
-					console.log(transactionDetails.cardTransactions[i].transactionDate,transactionDetails.cardTransactions[i].amount,
-					transactionDetails.cardTransactions[i].payee.name);
-				}
-				say.push(`<break time="1s" /> If you find any dispute in transaction <break strength=\"medium\" />
-				Please contact us <say-as interpret-as="telephone">800-771-6075</say-as>
-				<break strength=\"medium\" /> or mail us at <break strength=\"medium\" /> universalpremiummc@fleetcor.com `);
-				say.push(`<break strength=\"medium\" />Is there anything I can help you with?`);
-				response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
-				response.say(say.join('\n'));
-			}
-		}).catch((error) => {
-			say = [`Sorry,<break strength=\"medium\" /> I am not able to answer this at the moment. Please try again later`];
-			response.shouldEndSession(true);
-			response.say(say.join('\n'));
-		});
-		//After completing the operation reset the flag
-		response.session('isRecentTransactions', false);
 	} else {
 		let say = ["I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card"];
 		response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
@@ -328,17 +298,6 @@ alexaApp.intent('yesIntent',async function (request, response) {
 			say = ["OK, Your card will not be blocked <break strength=\"medium\" />Is there anything I can help you with?"];
 			response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
 		}
-	} else if(request.getSession().details.attributes.isRecentTransactions){
-		if(request.getSession().details.attributes.isExistingCard){
-			response.session('isExistingCard', false);
-			say = ["Sure,<break strength=\"medium\" /> Please provide the ID of the card you wish to know"];
-			response.shouldEndSession(false, "Tell me the ID of your card to check the credit limit");
-		} else {
-			//After completing the operation reset the flag
-			response.session('isRecentTransactions', false);
-			say = ["OK <break strength=\"medium\" /> Is there anything I can help you with?"];
-			response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
-		}
 	} else {
 		say = [`ok <break strength=\"medium\" /> Happy to help you`];
 		response.shouldEndSession(true);
@@ -349,10 +308,34 @@ alexaApp.intent('yesIntent',async function (request, response) {
  //To handle the recent transaction queries
 alexaApp.intent('transactionsIntent', async function(request, response){
 	console.log("Inside Trans Intent ");
-	response.session('isRecentTransactions', true);
 	let say = [];
+	await api.recentTransaction(request.getSession().details.accessToken).then((transactionDetails) => {
+		console.log("Tran data ", transactionDetails.cardTransactions.length);
+		if(transactionDetails.cardTransactions.length == 0){
+			say = [`You don't have any recent transactions in your card <break strength=\"medium\" /> You can use your fleetcard in any of the specified Merchant Location
+			<break strength=\"medium\" /> Is there anything I can help you with?`];
+			response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
+			response.say(say.join('\n'));
+		} else {
+			say = [`You have the following transactions for the card ending with <say-as interpret-as='digits'> ${request.getSession().details.attributes.cardId} </say-as>`];
+			let totalLength = transactionDetails.cardTransactions.length > 5 ? 5 : transactionDetails.cardTransactions.length;
+			for(var i=0;i<totalLength;i++){
+				console.log(transactionDetails.cardTransactions[i].transactionDate,transactionDetails.cardTransactions[i].amount,
+				transactionDetails.cardTransactions[i].payee.name);
+			}
+			say.push(`<break time="1s" /> If you find any dispute in transaction <break strength=\"medium\" />
+			Please contact us <say-as interpret-as="telephone">800-771-6075</say-as>
+			<break strength=\"medium\" /> or mail us at <break strength=\"medium\" /> universalpremiummc@fleetcor.com `);
+			say.push(`<break strength=\"medium\" />Is there anything I can help you with?`);
+			response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
+			response.say(say.join('\n'));
+		}
+	}).catch((error) => {
+			say = [`Sorry,<break strength=\"medium\" /> I am not able to answer this at the moment. Please try again later`];
+			response.shouldEndSession(true);
+			response.say(say.join('\n'));
+		});
 	if(request.data.request.intent.slots.transactionNumber.value){
-		response.session('cardId', request.data.request.intent.slots.transactionNumber.value);
 		await handleQuery(request, say, response);
 	} else {
 		if(request.getSession().details.attributes.cardId != ""){
@@ -372,7 +355,6 @@ alexaApp.intent('transactionsIntent', async function(request, response){
  
  alexaApp.intent('AMAZON.StopIntent', function (request, response) {
 	response.session('isblockCard', false);
-	response.session('isRecentTransactions', false);
 	response.session('isExistingCard', false);
 	console.log("Inside stop Intent");
     let say = ["Happy to help you! Good bye"];
@@ -389,7 +371,6 @@ alexaApp.intent('AMAZON.HelpIntent', function (request, response) {
 
 alexaApp.intent('AMAZON.CancelIntent', function (request, response) {
 	response.session('isblockCard', false);
-	response.session('isRecentTransactions', false);
 	response.session('isExistingCard', false);
 	console.log("Inside cancel Intent");
     let say = ["Happy to help you! Good bye"];
@@ -400,7 +381,6 @@ alexaApp.intent('AMAZON.CancelIntent', function (request, response) {
 //To handle if user wants to end the conversation
 alexaApp.intent('thankIntent', function (request, response) {
 	response.session('isblockCard', false);
-	response.session('isRecentTransactions', false);
 	response.session('isExistingCard', false);	
 	console.log("Inside thank Intent");
     var say =["<s> Happy to help you!</s><break strength=\"medium\" /> Good bye"];
@@ -445,53 +425,6 @@ async function handleQuery(request, token, say, response){
 				}).catch((error) => {
 					console.log("Error in saving card details");
 				});
-			}
-		}).catch((error) => {
-			console.log("Error in getting card details ", error);
-			say = [`Sorry, <break strength=\"medium\" /> I am not able to answer this at the moment.<break strength=\"medium\" /> Please try again later`];
-			response.shouldEndSession(true);
-			response.say(say.join('\n'));
-		});
-	} else if(request.getSession().details.attributes.isRecentTransactions) {
-		await api.getCardDetails(token, request.getSession().details.attributes.cardId).then(async (cardDetails) => {
-			if(cardDetails){
-				await api.recentTransaction(request.getSession().details.accessToken, request.getSession().details.attributes.cardId).then((transactionDetails) => {
-					console.log("Tran data ", transactionDetails.cardTransactions.length);
-					if(transactionDetails.cardTransactions.length == 0){
-						say = [`You don't have any recent transactions in your card <break strength=\"medium\" /> You can use your fleetcard in any of the specified Merchant Location
-						<break strength=\"medium\" /> Is there anything I can help you with?`];
-						response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
-						response.say(say.join('\n'));
-					} else {
-						const moment = require('moment');
-						say = [`You have the following transactions for the card ending with <say-as interpret-as='digits'> ${request.getSession().details.attributes.cardId} </say-as>`];
-						let totalLength = transactionDetails.cardTransactions.length > 5 ? 5 : transactionDetails.cardTransactions.length;
-						for(var i=0;i<totalLength;i++){
-							console.log(moment(transactionDetails.cardTransactions[i].transactionDate).format('MM/DD/YYYY'),transactionDetails.cardTransactions[i].amount,
-							transactionDetails.cardTransactions[i].payee.name);
-						}
-						say.push(`<break time="1s" /> If you find any dispute in transaction <break strength=\"medium\" />
-						Please contact us <say-as interpret-as="telephone">800-771-6075</say-as>
-						<break strength=\"medium\" /> or mail us at <break strength=\"medium\" /> universalpremiummc@fleetcor.com `);
-						say.push(`<break strength=\"medium\" />Is there anything I can help you with?`);
-						response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
-						response.say(say.join('\n'));
-					}
-				}).catch((error) => {
-					say = [`Sorry,<break strength=\"medium\" /> I am not able to answer this at the moment. Please try again later`];
-					response.shouldEndSession(true);
-					response.say(say.join('\n'));
-				});
-				//After completing the operation reset the flag
-				response.session("isRecentTransactions", false);
-			} else {
-				//After completing the operation reset the flag
-				response.session("isRecentTransactions", false);
-				say = [`Please check <break strength=\"medium\" /> There is no card ending with <say-as interpret-as='digits'> ${request.getSession().details.attributes.cardId} </say-as>
-				<break strength=\"medium\" />Is there anything I can help you with?`];
-				response.session("cardId",0);
-				response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
-				response.say(say.join('\n'));
 			}
 		}).catch((error) => {
 			console.log("Error in getting card details ", error);

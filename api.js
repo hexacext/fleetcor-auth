@@ -143,7 +143,7 @@ var api = {
 		});
 	},
 	//To get the recent transactions for the user using card id
-	recentTransaction: (token, cardId) => {
+	recentTransaction: (token) => {
 		console.log("Inside the recent Transaction API");
 		//For testing use date b/w 2016-01-01 to current date
 		//Convert date to milliseconds
