@@ -317,10 +317,13 @@ alexaApp.intent('transactionsIntent', async function(request, response){
 			response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
 			response.say(say.join('\n'));
 		} else {
-			say = [`You have the following transactions for the card ending with <say-as interpret-as='digits'> ${request.getSession().details.attributes.cardId} </say-as>`];
+			const moment = require('moment');
+			say = [`You last 5 transactions are`];
 			let totalLength = transactionDetails.cardTransactions.length > 5 ? 5 : transactionDetails.cardTransactions.length;
 			for(var i=0;i<totalLength;i++){
-				console.log(transactionDetails.cardTransactions[i].transactionDate,transactionDetails.cardTransactions[i].amount,
+				console.log(moment(transactionDetails.cardTransactions[i].transactionDate).format('MM/DD/YYYY'),
+				moment(transactionDetails.cardTransactions[i].transactionDate).format('h mm A'),
+				,transactionDetails.cardTransactions[i].amount,
 				transactionDetails.cardTransactions[i].payee.name);
 			}
 			say.push(`<break time="1s" /> If you find any dispute in transaction <break strength=\"medium\" />
