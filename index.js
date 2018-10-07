@@ -69,7 +69,7 @@ app.post('/accessToken', async (request, response) => {
 					refresh_token: newTokenDetails["refresh-token"]
 				};
 				authData.token_type = "bearer";
-				authData.expires_in = 360;
+				authData.expires_in = 86400;
 				authData.scope = "profile offline";
 				response.send(authData);
 			}
@@ -290,7 +290,7 @@ alexaApp.intent('yesIntent',async function (request, response) {
     if(request.getSession().details.attributes.isblockCard){
 		if(request.getSession().details.attributes.isExistingCard){
 			response.session('isExistingCard', false);
-			say = ["Sure,<break strength=\"medium\" /> Please provide the ID of the card you wish to block"];
+			say = ["OK,<break strength=\"medium\" /> Please provide the ID of the card you wish to block"];
 			response.shouldEndSession(false, "Tell me the ID of your card to be blocked");			
 		} else {
 			//After completing the operation reset the flag

@@ -26,7 +26,7 @@ border-radius: 10px;
 font-family: raleway;
 float:left;
 margin-top:50px;
-background-color: #B0E0E6;
+/*background-color: #B0E0E6;*/
 }
 input[type=text],input[type=password]{
 width: 100%;
@@ -76,4 +76,8 @@ outline:none;
 }
 input[type=submit]:hover{
 background: linear-gradient(#00BFFF 5%, #1E90FF 100%);
+}
+img {
+	height: 73px;
+	width: 299px;
 }
