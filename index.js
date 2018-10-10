@@ -139,7 +139,8 @@ alexaApp.launch(async (request, response) => {
 				response.say('<s>FleetCor Assistant requires you to link your FleetCor account</s>');
 				response.shouldEndSession(true);
 			} else {
-				await db.loadSession(request.userId).then((sessionDetails) => {
+				await db.loadSession(userDetails.userId).then((sessionDetails) => {
+					response.session('userId', userDetails.userId);
 					say.push(`Hi ${userDetails.firstName} ${userDetails.lastName} <break strength="medium" />
 						I am Fleetcor Assistant.<break strength="medium" />I can help you with managing your Fleetcards.
 						<break strength="medium" />You may ask ‘What is my credit limit?’ or <break strength="medium" /> ‘What is my available balance?’.
@@ -264,7 +265,7 @@ alexaApp.intent('yesIntent',async function (request, response) {
 					say = ["Your card has been blocked successfully <break strength=\"medium\" /> Is there anything I can help you with?"];
 					response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
 					response.say(say.join('\n'));
-					db.updateSession(request.userId, 0).then(() => {
+					db.updateSession(request.getSession().details.attributes.userId, 0).then(() => {
 						console.log("Card Id updated to 0");
 					}).catch((error) => {
 						console.log("Error in saving card details ", error);
@@ -404,7 +405,7 @@ async function handleQuery(request, token, say, response){
 				Are you sure <break strength=\"medium\" /> you want to block the card with ID <say-as interpret-as='digits'> ${request.getSession().details.attributes.cardId} </say-as>`];
 				response.shouldEndSession(false, "Say Yes to block <break strength=\"medium\" /> or No to not block the card");
 				response.say(say.join('\n'));
-				db.updateSession(request.userId, request.getSession().details.attributes.cardId).then(() => {
+				db.updateSession(request.getSession().details.attributes.userId, request.getSession().details.attributes.cardId).then(() => {
 					console.log("Card Id saved successfully");
 				}).catch((error) => {
 					console.log("Error in saving card details ", error);
@@ -418,7 +419,7 @@ async function handleQuery(request, token, say, response){
 				console.log("cardId ", request.getSession().details.attributes.cardId);
 				response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
 				response.say(say.join('\n'));
-				db.updateSession(request.userId, 0).then(() => {
+				db.updateSession(request.getSession().details.attributes.userId, 0).then(() => {
 					console.log("Card Id updated to 0");
 				}).catch((error) => {
 					console.log("Error in saving card details ", error);
