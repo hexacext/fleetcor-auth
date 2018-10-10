@@ -151,7 +151,6 @@ alexaApp.launch(async (request, response) => {
 					response.session('isblockCard', false);
 					response.session('isExistingCard', false);
 					response.session('cardId', 0);
-					response.session('cardId', sessionDetails.cardId);
 					if(sessionDetails == 0){
 						console.log("No session value loading card id to zero");
 					} else {
