@@ -123,6 +123,7 @@ var api = {
 	//To block the user card using the card id
 	blockCard: (token, cardId, cardJson) => {
 		console.log("Inside block card API");
+		cardJson.status = "TURNED_OFF";
 		let options = {
 			url: config.apiDomain + config.blockCardURL.replace('CARD_ID',cardId),
 			method: 'PUT',
