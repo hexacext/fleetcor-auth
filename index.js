@@ -22,6 +22,14 @@ app.get('/login', (request, response) => {
 	response.sendFile(__dirname + '/login.html');
 });
 
+app.get('/privacy', (request, response) => {
+	response.sendFile(__dirname + '/privacyPolicy.txt');
+});
+
+app.get('/terms', (request, response) => {
+	response.sendFile(__dirname + '/termsOfUse.txt');
+});
+
 //To generate the code after authorization
 app.post('/generateToken', async (request, response) => {
 	console.log("Inside generateToken ");
