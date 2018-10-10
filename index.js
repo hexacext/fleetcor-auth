@@ -248,7 +248,7 @@ alexaApp.intent('cardNumberIntent', async function (request, response) {
 	console.log("Inside CN Intent");
 	var say = [];
 	console.log(request.data.request.intent.slots.cardNumber.value);
-	if(request.data.request.intent.slots.cardNumber.value){
+	if(request.data.request.intent.slots.cardNumber.value && request.data.request.intent.slots.cardNumber.value != "?"){
 		response.session("cardId",request.data.request.intent.slots.cardNumber.value);
 		await handleQuery(request, request.getSession().details.accessToken, say, response);
 	} else {
