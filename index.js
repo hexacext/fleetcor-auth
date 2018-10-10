@@ -253,6 +253,7 @@ alexaApp.intent('cardNumberIntent', async function (request, response) {
 		await handleQuery(request, request.getSession().details.accessToken, say, response);
 	} else {
 		say = [`Sorry, I didn't understand the card ID. Please repeat the card ID`];
+		response.shouldEndSession(false, "Tell me the ID for the card");
 		response.say(say.join('\n'));
 	}
 });
