@@ -156,6 +156,7 @@ alexaApp.launch(async (request, response) => {
 						console.log("No session value loading card id to zero");
 					} else {
 						console.log("Last accessed card ", sessionDetails.cardId);
+						response.session('cardId', sessionDetails.cardId);
 					}
 					response.send();
 				}).catch((errors) => {
