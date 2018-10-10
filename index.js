@@ -257,6 +257,11 @@ alexaApp.intent('yesIntent',async function (request, response) {
 					say = ["Your card has been blocked successfully <break strength=\"medium\" /> Is there anything I can help you with?"];
 					response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
 					response.say(say.join('\n'));
+					db.updateSession(request.userId, 0).then(() => {
+						console.log("Card Id updated to 0");
+					}).catch((error) => {
+						console.log("Error in saving card details ", error);
+					});
 				}).catch((error) => {
 					say = [`I am not able to complete your request at the moment.<break strength=\"medium\" /> Please try again later`];
 					response.shouldEndSession(true);
@@ -393,9 +398,9 @@ async function handleQuery(request, token, say, response){
 				response.shouldEndSession(false, "Say Yes to block <break strength=\"medium\" /> or No to not block the card");
 				response.say(say.join('\n'));
 				db.updateSession(request.userId, request.getSession().details.attributes.cardId).then(() => {
-					console.log("Card Id ", request.data.request.intent.slots.lastFour.value, "saved successfully");
+					console.log("Card Id saved successfully");
 				}).catch((error) => {
-					console.log("Error in saving card details");
+					console.log("Error in saving card details ", error);
 				});
 			} else {
 				//After completing the operation reset the flag
@@ -407,9 +412,9 @@ async function handleQuery(request, token, say, response){
 				response.shouldEndSession(false, "I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
 				response.say(say.join('\n'));
 				db.updateSession(request.userId, 0).then(() => {
-					console.log("Card Id ", request.data.request.intent.slots.lastFour.value, "saved successfully");
+					console.log("Card Id updated to 0");
 				}).catch((error) => {
-					console.log("Error in saving card details");
+					console.log("Error in saving card details ", error);
 				});
 			}
 		}).catch((error) => {
