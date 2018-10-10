@@ -31,6 +31,7 @@ app.post('/generateToken', async (request, response) => {
 	await api.getAccessToken(request.body).then((token) => {
 		if(token == " "){
 			console.log("Username and password does not match");
+			response.redirect(`${urlParts.query.redirect_uri}`);
 		} else {
 			const uid = require('uid');
 			let authData = {
