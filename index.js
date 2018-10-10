@@ -246,10 +246,15 @@ alexaApp.intent('blockCardIntent', async function (request, response) {
  //To get the card id
 alexaApp.intent('cardNumberIntent', async function (request, response) {
 	console.log("Inside CN Intent");
-    var say = [];
-    console.log(request.data.request.intent.slots.cardNumber.value);
-	response.session("cardId",request.data.request.intent.slots.cardNumber.value);
-	await handleQuery(request, request.getSession().details.accessToken, say, response);
+	var say = [];
+	console.log(request.data.request.intent.slots.cardNumber.value);
+	if(request.data.request.intent.slots.cardNumber.value){
+		response.session("cardId",request.data.request.intent.slots.cardNumber.value);
+		await handleQuery(request, request.getSession().details.accessToken, say, response);
+	} else {
+		say = [`Sorry, I didn't understand the card ID. Please repeat the card ID`];
+		response.say(say.join('\n'));
+	}
 });
 
 //To handle the user input - Yes
