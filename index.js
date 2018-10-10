@@ -407,7 +407,7 @@ async function handleQuery(request, token, say, response){
 	if(request.getSession().details.attributes.isblockCard){
 		console.log("Inside block card handle");
 		await api.getCardDetails(token, request.getSession().details.attributes.cardId).then((cardDetails) => {
-			if(cardDetails){
+			if(cardDetails && cardDetails.status != "TURNED_OFF"){
 				say = [`The card once blocked cannot be unblocked <break strength=\"medium\" /> it can only be re-issued <break strength=\"x-strong\" /> 
 				Are you sure <break strength=\"medium\" /> you want to block the card with ID <say-as interpret-as='digits'> ${request.getSession().details.attributes.cardId} </say-as>`];
 				response.shouldEndSession(false, "Say Yes to block <break strength=\"medium\" /> or No to not block the card");
