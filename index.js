@@ -396,8 +396,8 @@ alexaApp.intent('thankIntent', function (request, response) {
 
 alexaApp.intent('AMAZON.FallbackIntent', function (request, response) {
 	console.log("Inside fallback Intent");
-    var say =["Sorry,<break strength=\"medium\" />I cannot help you at the moment.<break strength=\"medium\" />Try again later"];
-    response.shouldEndSession(true);
+    var say = ["Sorry, I didn't catch that"];
+    response.shouldEndSession(false,"I can help you with credit limit,<break strength=\"medium\" /> account balance <break strength=\"medium\" /> or block your card");
     response.say(say.join('\n'));
 });
 
